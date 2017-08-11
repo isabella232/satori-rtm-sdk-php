@@ -1,0 +1,43 @@
+{
+	"name": "satori/satori-rtm-sdk-go",
+	"type": "library",
+	"description": "Create disruptive live data apps with Internet-scale",
+	"keywords": [
+        "sdk",
+		"api",
+		"real-time",
+		"realtime",
+		"real time",
+		"websocket",
+		"satori",
+		"iot",
+		"multiplayer"
+	],
+	"homepage": "https://www.satori.com/",
+	"license": "BSD-3-Clause-Custom",
+	"version": "1.0.0",
+	"authors": [{
+		"name": "Satori SDK Team",
+		"email": "sdk@satori.com"
+	}],
+	"scripts": {
+		"test": "./vendor/bin/phpunit --bootstrap tests/bootstrap.php tests/",
+		"test-verbose": "./vendor/bin/phpunit --bootstrap tests/bootstrap.php tests/ --verbose",
+		"phpdoc": "./vendor/bin/phpdoc -d src -t docs --force --template=\"responsive-twig\""
+	},
+	"require": {
+		"php": ">=5.6.0"
+	},
+	"require-dev": {
+		"phpunit/phpunit": "^5.7",
+		"phpdocumentor/phpdocumentor": "2.*"
+	},
+	"autoload": {
+		"psr-0": {
+			"RtmClient\\": "src/"
+		}
+	},
+	"autoload-dev": {
+		"psr-0": {}
+	}
+}
