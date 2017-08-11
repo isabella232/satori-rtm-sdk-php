@@ -17,12 +17,12 @@ RTM to publish and subscribe.
 
 To install the PHP SDK from the [Central Composer repository](https://packagist.org) use [composer](https://getcomposer.org/download):
 ```bash
-composer require satori-com/satori-rtm-sdk-php
+composer require satori-com/satori-rtm-sdk-php=dev-master
 ```
 
 Highly recommended to use version tag when installing SDK:
 ```bash
-composer require satori-com/satori-rtm-sdk-php:1.0.0
+composer require satori-com/satori-rtm-sdk-php:1.2.3.4
 ```
 
 Detailed information about the PHP SDK package and a list of available versions can be found here:
