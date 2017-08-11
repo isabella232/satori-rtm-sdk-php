@@ -1,0 +1,694 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=0"/>
+    <meta charset="utf-8"/>
+    <title>    Satori RTM PHP SDK &raquo; \RtmClient\Connection
+</title>
+    <meta name="author" content=""/>
+    <meta name="description" content=""/>
+
+            <link href="../css/template.css" rel="stylesheet" media="all"/>
+    
+            <!--[if lt IE 9]>
+        <script src="https://html5shim.googlecode.com/svn/trunk/html5.js" type="text/javascript"></script>
+        <![endif]-->
+        <script src="../js/jquery-1.7.1.min.js" type="text/javascript"></script>
+        <script src="../js/jquery-ui-1.8.2.custom.min.js" type="text/javascript"></script>
+        <script src="../js/jquery.mousewheel.min.js" type="text/javascript"></script>
+        <script src="../js/bootstrap.js" type="text/javascript"></script>
+        <script src="../js/template.js" type="text/javascript"></script>
+        <script src="../js/prettify/prettify.min.js" type="text/javascript"></script>
+    
+            <link rel="shortcut icon" href="../img/favicon.ico"/>
+        <link rel="apple-touch-icon" href="../img/apple-touch-icon.png"/>
+        <link rel="apple-touch-icon" sizes="72x72" href="../img/apple-touch-icon-72x72.png"/>
+        <link rel="apple-touch-icon" sizes="114x114" href="../img/apple-touch-icon-114x114.png"/>
+    </head>
+<body>
+
+        <div class="navbar navbar-fixed-top">
+        <div class="navbar-inner">
+            <div class="container">
+                <a class="btn btn-navbar" data-toggle="collapse" data-target=".nav-collapse">
+                    <span class="icon-bar"></span> <span class="icon-bar"></span>
+                    <span class="icon-bar"></span> </a>
+                <a class="brand" href="../index.html">Satori RTM PHP SDK</a>
+
+                <div class="nav-collapse">
+                    <ul class="nav">
+                        <li class="dropdown">
+                            <a href="#api" class="dropdown-toggle" data-toggle="dropdown">
+                                API Documentation <b class="caret"></b>
+                            </a>
+                            <ul class="dropdown-menu">
+                                                                    <li><a>Namespaces</a></li>
+                                                                        <li><a href="../namespaces/RtmClient.html">RtmClient</a></li>
+                                                                                                                                </ul>
+                        </li>
+                        <li class="dropdown" id="charts-menu">
+                            <a href="#charts" class="dropdown-toggle" data-toggle="dropdown">
+                                Charts <b class="caret"></b>
+                            </a>
+                            <ul class="dropdown-menu">
+                                <li>
+                                    <a href="../graph_class.html">
+                                        <i class="icon-list-alt"></i>&#160;Class hierarchy diagram
+                                    </a>
+                                </li>
+                            </ul>
+                        </li>
+                        <li class="dropdown" id="reports-menu">
+                            <a href="#reports" class="dropdown-toggle" data-toggle="dropdown">
+                                Reports <b class="caret"></b>
+                            </a>
+                            <ul class="dropdown-menu">
+                                <li>
+                                    <a href="../errors.html">
+                                        <i class="icon-list-alt"></i>&#160;Errors
+                                    </a>
+                                </li>
+                                <li>
+                                    <a href="../markers.html">
+                                        <i class="icon-list-alt"></i>&#160;Markers
+                                    </a>
+                                </li>
+                                <li>
+                                    <a href="../deprecated.html">
+                                        <i class="icon-list-alt"></i>&#160;Deprecated
+                                    </a>
+                                </li>
+                            </ul>
+                        </li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+        <div class="go_to_top">
+            <a href="#___" style="color: inherit">Back to top&#160;&#160;<i class="icon-upload icon-white"></i></a>
+        </div>
+    </div>
+    
+    <div id="___" class="container">
+        <noscript>
+            <div class="alert alert-warning">
+                Javascript is disabled; several features are only available if Javascript is enabled.
+            </div>
+        </noscript>
+
+        
+            <style>
+        .deprecated h2 {
+            text-decoration: line-through;
+        }
+    </style>
+    <div class="row">
+        <div class="span4">
+                    <div class="btn-group view pull-right" data-toggle="buttons-radio">
+        <button class="btn details" title="Show descriptions and method names"><i class="icon-list"></i></button>
+        <button class="btn simple" title="Show only method names"><i class="icon-align-justify"></i></button>
+    </div>
+    <div class="btn-group visibility" data-toggle="buttons-checkbox">
+        <button class="btn public active" title="Show public elements">Public</button>
+        <button class="btn protected" title="Show protected elements">Protected</button>
+        <button class="btn private" title="Show private elements">Private</button>
+        <button class="btn inherited active" title="Show inherited elements">Inherited</button>
+    </div>
+
+        <ul class="side-nav nav nav-list">
+        <li class="nav-header">
+            <i class="icon-custom icon-method"></i> Methods
+            <ul>
+                                                                                                    <li class="method public">
+        <a href="#method___construct" title="__construct :: Creates \Rtm\Connection instance.">
+            <span class="description">Creates \Rtm\Connection instance.</span><pre>__construct</pre>
+        </a>
+    </li>
+
+                                                                                                        <li class="method public">
+        <a href="#method_close" title="close :: Closes connection.">
+            <span class="description">Closes connection.</span><pre>close</pre>
+        </a>
+    </li>
+
+                                                                                                                                                                <li class="method public">
+        <a href="#method_connect" title="connect :: Starts connection to the endpoint.">
+            <span class="description">Starts connection to the endpoint.</span><pre>connect</pre>
+        </a>
+    </li>
+
+                                                                                                                                                                <li class="method public">
+        <a href="#method_read" title="read :: Reads data from the connection and converts to PDU.">
+            <span class="description">Reads data from the connection and converts to PDU.</span><pre>read</pre>
+        </a>
+    </li>
+
+                                                                                                        <li class="method public">
+        <a href="#method_send" title="send :: Forms and sends PDU using websocket connection.">
+            <span class="description">Forms and sends PDU using websocket connection.</span><pre>send</pre>
+        </a>
+    </li>
+
+                                                                                                        <li class="method public">
+        <a href="#method_sendPing" title="sendPing :: Sends PING to server: https://tools.ietf.org/html/rfc6455#section-5.5.2">
+            <span class="description">Sends PING to server: https://tools.ietf.org/html/rfc6455#section-5.5.2</span><pre>sendPing</pre>
+        </a>
+    </li>
+
+                                                                                                        <li class="method public">
+        <a href="#method_waitAllReplies" title="waitAllReplies :: Waits for all ack responses from Satori RTM.">
+            <span class="description">Waits for all ack responses from Satori RTM.</span><pre>waitAllReplies</pre>
+        </a>
+    </li>
+
+                                                </ul>
+        </li>
+        <li class="nav-header protected">» Protected
+            <ul>
+                                                                                                                                                    <li class="method protected">
+                            <a href="#method_closeCallbacks" title="closeCallbacks :: Closes awating callbacks.">
+                                <span class="description">Closes awating callbacks.</span><pre>closeCallbacks</pre>
+                            </a>
+                        </li>
+                                                                                                                    <li class="method protected">
+                            <a href="#method_nextId" title="nextId :: Generates next ID for PDU.">
+                                <span class="description">Generates next ID for PDU.</span><pre>nextId</pre>
+                            </a>
+                        </li>
+                                                                                                                                                                                                </ul>
+        </li>
+        <li class="nav-header private">» Private
+            <ul>
+                                                                                                                                                                                                                                                                                                                                                                                </ul>
+        </li>
+        <li class="nav-header">
+            <i class="icon-custom icon-constant"></i> Constants
+            <ul>
+                            </ul>
+        </li>
+    </ul>
+
+
+        </div>
+
+        <div class="span8">
+            <div class="element class">
+                <h1>Connection</h1>
+                <small style="display: block; text-align: right">
+                                                        </small>
+                <p class="short_description">Satori RTM Connection.</p>
+                <div class="details">
+                    <div class="long_description">
+                        <p>Access the RTM Service on the connection level to connect to the RTM Service, send and receive PDUs
+Uses WebSocket client to connect to RTM.</p>
+<p>Does not handle any possible exceptions from the WS client.</p>
+                    </div>
+                    <table class="table table-bordered">
+                                                                                    <tr>
+                                    <th>
+                                        package
+                                                                            </th>
+                                    <td>
+                                                                                    
+                                                                                <p>Default</p>
+                                    </td>
+                                </tr>
+                                                                                                                                                                                </table>
+
+                    <h3><i class="icon-custom icon-method"></i> Methods</h3>
+                                                                <a id="method___construct"></a>
+                        <div class="element clickable method public  method___construct" data-toggle="collapse" data-target=".method___construct .collapse">
+                            <h2>Creates \Rtm\Connection instance.</h2>
+                            <pre>__construct(string $endpoint, array $options = array()) </pre>
+                            <div class="labels">
+                                                                                                                                                                                            </div>
+
+                            
+                            <div class="row collapse">
+                                <div class="detail-description">
+                                    <div class="long_description"></div>
+
+                                    <table class="table">
+                                                                                    <tr>
+                                                <th>
+                                                    
+                                                </th>
+                                                <td>
+                                                                                                    </td>
+                                            </tr>
+                                                                                                                            <tr>
+                                                <th>Throws</th>
+                                                <td>
+                                                    <dl>
+                                                                                                            <dt>\RtmClient\WebSocket\Exceptions\BadSchemeException</dt>
+                                                        <dd><p>when endpoint schema is not starting from https://, http://, ws://, wss://</p></dd>
+                                                                                                            <dt>\RtmClient\WebSocket\Exceptions\ConnectionException</dt>
+                                                        <dd><p>when connection is broken, unable to connect or send/read from the connection</p></dd>
+                                                                                                                                                            </dl>
+                                                </td>
+                                            </tr>
+                                                                            </table>
+
+                                                                            <h3>Arguments</h3>
+                                                                                    <div class="subelement argument">
+                                                <h4>$endpoint</h4>
+                                                <code>string</code><p></p>
+                                            </div>
+                                                                                    <div class="subelement argument">
+                                                <h4>$options</h4>
+                                                <code>array</code><p><p>Connection instance options</p>
+<pre><code>$options = [
+  'logger' =&gt; (\Psr\Log\LoggerInterface Custom logger
+]</code></pre></p>
+                                            </div>
+                                                                            
+                                                                    </div>
+                            </div>
+
+                        </div>
+                                            <a id="method_close"></a>
+                        <div class="element clickable method public  method_close" data-toggle="collapse" data-target=".method_close .collapse">
+                            <h2>Closes connection.</h2>
+                            <pre>close( $reason = &#039;Connection closed&#039;) </pre>
+                            <div class="labels">
+                                                                                                                                                                                            </div>
+
+                            
+                            <div class="row collapse">
+                                <div class="detail-description">
+                                    <div class="long_description"></div>
+
+                                    <table class="table">
+                                                                                    <tr>
+                                                <th>
+                                                    
+                                                </th>
+                                                <td>
+                                                                                                    </td>
+                                            </tr>
+                                                                                    <tr>
+                                                <th>
+                                                    
+                                                </th>
+                                                <td>
+                                                                                                    </td>
+                                            </tr>
+                                                                                                                    </table>
+
+                                                                            <h3>Arguments</h3>
+                                                                                    <div class="subelement argument">
+                                                <h4>$reason</h4>
+                                                <code></code><p></p>
+                                            </div>
+                                                                            
+                                                                    </div>
+                            </div>
+
+                        </div>
+                                            <a id="method_closeCallbacks"></a>
+                        <div class="element clickable method protected  method_closeCallbacks" data-toggle="collapse" data-target=".method_closeCallbacks .collapse">
+                            <h2>Closes awating callbacks.</h2>
+                            <pre>closeCallbacks(string $reason) : void</pre>
+                            <div class="labels">
+                                                                                                                                                                                            </div>
+
+                            
+                            <div class="row collapse">
+                                <div class="detail-description">
+                                    <div class="long_description"><p>Sends &quot;disconnected&quot; error to all callbacks that await for the response
+from Satori RTM.</p></div>
+
+                                    <table class="table">
+                                                                                                                    </table>
+
+                                                                            <h3>Arguments</h3>
+                                                                                    <div class="subelement argument">
+                                                <h4>$reason</h4>
+                                                <code>string</code><p><p>Disconnect reason</p></p>
+                                            </div>
+                                                                            
+                                                                    </div>
+                            </div>
+
+                        </div>
+                                            <a id="method_connect"></a>
+                        <div class="element clickable method public  method_connect" data-toggle="collapse" data-target=".method_connect .collapse">
+                            <h2>Starts connection to the endpoint.</h2>
+                            <pre>connect() : true</pre>
+                            <div class="labels">
+                                                                                                                                                                                            </div>
+
+                            
+                            <div class="row collapse">
+                                <div class="detail-description">
+                                    <div class="long_description"></div>
+
+                                    <table class="table">
+                                                                                    <tr>
+                                                <th>
+                                                    
+                                                </th>
+                                                <td>
+                                                                                                    </td>
+                                            </tr>
+                                                                                                                            <tr>
+                                                <th>Throws</th>
+                                                <td>
+                                                    <dl>
+                                                                                                            <dt>\RtmClient\WebSocket\Exceptions\ConnectionException</dt>
+                                                        <dd><p>when connection is broken, unable to connect or send/read from the connection</p></dd>
+                                                                                                                                                            </dl>
+                                                </td>
+                                            </tr>
+                                                                            </table>
+
+                                    
+                                                                            <h3>Response</h3>
+                                        <code>true</code><p></p>
+                                                                    </div>
+                            </div>
+
+                        </div>
+                                            <a id="method_nextId"></a>
+                        <div class="element clickable method protected  method_nextId" data-toggle="collapse" data-target=".method_nextId .collapse">
+                            <h2>Generates next ID for PDU.</h2>
+                            <pre>nextId() : integer</pre>
+                            <div class="labels">
+                                                                                                                                                                                            </div>
+
+                            
+                            <div class="row collapse">
+                                <div class="detail-description">
+                                    <div class="long_description"></div>
+
+                                    <table class="table">
+                                                                                    <tr>
+                                                <th>
+                                                    
+                                                </th>
+                                                <td>
+                                                                                                    </td>
+                                            </tr>
+                                                                                                                    </table>
+
+                                    
+                                                                            <h3>Response</h3>
+                                        <code>integer</code><p><p>Next id</p></p>
+                                                                    </div>
+                            </div>
+
+                        </div>
+                                            <a id="method_read"></a>
+                        <div class="element clickable method public  method_read" data-toggle="collapse" data-target=".method_read .collapse">
+                            <h2>Reads data from the connection and converts to PDU.</h2>
+                            <pre>read(integer $mode, integer $timeout_sec, integer $timeout_microsec) : array</pre>
+                            <div class="labels">
+                                                                                                                                                                                            </div>
+
+                            
+                            <div class="row collapse">
+                                <div class="detail-description">
+                                    <div class="long_description"></div>
+
+                                    <table class="table">
+                                                                                                                            <tr>
+                                                <th>Throws</th>
+                                                <td>
+                                                    <dl>
+                                                                                                            <dt>\Exception</dt>
+                                                        <dd><p>possible exceptions from user callbacks</p></dd>
+                                                                                                            <dt>\RtmClient\WebSocket\Exceptions\ConnectionException</dt>
+                                                        <dd><p>when connection is broken, unable to read from the connection</p></dd>
+                                                                                                            <dt>\RtmClient\ApplicationException</dt>
+                                                        <dd><p>if failed to parse incoming json string</p></dd>
+                                                                                                            <dt>\RtmClient\ApplicationException</dt>
+                                                        <dd><p>if missing &quot;action&quot; or &quot;body&quot; field in received PDU</p></dd>
+                                                                                                                                                            </dl>
+                                                </td>
+                                            </tr>
+                                                                            </table>
+
+                                                                            <h3>Arguments</h3>
+                                                                                    <div class="subelement argument">
+                                                <h4>$mode</h4>
+                                                <code>integer</code><p><p>\Rtm\WebSocket\Client::SYNC_READ or \Rtm\WebSocket\Client::ASYNC_READ</p></p>
+                                            </div>
+                                                                                    <div class="subelement argument">
+                                                <h4>$timeout_sec</h4>
+                                                <code>integer</code><p><p>The seconds part of the timeout to be set</p></p>
+                                            </div>
+                                                                                    <div class="subelement argument">
+                                                <h4>$timeout_microsec</h4>
+                                                <code>integer</code><p><p>The microseconds part of the timeout to be set</p></p>
+                                            </div>
+                                                                            
+                                                                            <h3>Response</h3>
+                                        <code>array</code><p><p>Combined \Rtm\WebSocket\ReturnCode and Rtm\Pdu\Pdu</p></p>
+                                                                    </div>
+                            </div>
+
+                        </div>
+                                            <a id="method_send"></a>
+                        <div class="element clickable method public  method_send" data-toggle="collapse" data-target=".method_send .collapse">
+                            <h2>Forms and sends PDU using websocket connection.</h2>
+                            <pre>send(string $action, array $body, callable $callback = null) : \RtmClient\always</pre>
+                            <div class="labels">
+                                                                                                                                                                                            </div>
+
+                            
+                            <div class="row collapse">
+                                <div class="detail-description">
+                                    <div class="long_description"></div>
+
+                                    <table class="table">
+                                                                                                                            <tr>
+                                                <th>Throws</th>
+                                                <td>
+                                                    <dl>
+                                                                                                            <dt>\RtmClient\WebSocket\Exceptions\ConnectionException</dt>
+                                                        <dd><p>when connection is broken, unable to connect or send/read from the connection</p></dd>
+                                                                                                                                                            </dl>
+                                                </td>
+                                            </tr>
+                                                                            </table>
+
+                                                                            <h3>Arguments</h3>
+                                                                                    <div class="subelement argument">
+                                                <h4>$action</h4>
+                                                <code>string</code><p><p>PDU action</p></p>
+                                            </div>
+                                                                                    <div class="subelement argument">
+                                                <h4>$body</h4>
+                                                <code>array</code><p><p>PDU body</p></p>
+                                            </div>
+                                                                                    <div class="subelement argument">
+                                                <h4>$callback</h4>
+                                                <code>callable</code><p><p>callback to be called when getting back request confirmation from RTM</p></p>
+                                            </div>
+                                                                            
+                                                                            <h3>Response</h3>
+                                        <code>\RtmClient\always</code><p><p>true</p></p>
+                                                                    </div>
+                            </div>
+
+                        </div>
+                                            <a id="method_sendPing"></a>
+                        <div class="element clickable method public  method_sendPing" data-toggle="collapse" data-target=".method_sendPing .collapse">
+                            <h2>Sends PING to server: https://tools.ietf.org/html/rfc6455#section-5.5.2</h2>
+                            <pre>sendPing(string $text = &#039;ping&#039;) : true</pre>
+                            <div class="labels">
+                                                                                                                                                                                            </div>
+
+                            
+                            <div class="row collapse">
+                                <div class="detail-description">
+                                    <div class="long_description"></div>
+
+                                    <table class="table">
+                                                                                                                    </table>
+
+                                                                            <h3>Arguments</h3>
+                                                                                    <div class="subelement argument">
+                                                <h4>$text</h4>
+                                                <code>string</code><p><p>Text to be send as ping payload</p></p>
+                                            </div>
+                                                                            
+                                                                            <h3>Response</h3>
+                                        <code>true</code><p><p>if sent</p></p>
+                                                                    </div>
+                            </div>
+
+                        </div>
+                                            <a id="method_waitAllReplies"></a>
+                        <div class="element clickable method public  method_waitAllReplies" data-toggle="collapse" data-target=".method_waitAllReplies .collapse">
+                            <h2>Waits for all ack responses from Satori RTM.</h2>
+                            <pre>waitAllReplies(integer $timeout_sec, integer $timeout_microsec) : void</pre>
+                            <div class="labels">
+                                                                                                                                                                                            </div>
+
+                            
+                            <div class="row collapse">
+                                <div class="detail-description">
+                                    <div class="long_description"></div>
+
+                                    <table class="table">
+                                                                                                                            <tr>
+                                                <th>Throws</th>
+                                                <td>
+                                                    <dl>
+                                                                                                            <dt>\RtmClient\WebSocket\Exceptions\ConnectionException</dt>
+                                                        <dd><p>when connection is broken, unable to connect or send/read from the connection</p></dd>
+                                                                                                            <dt>\RtmClient\ApplicationException</dt>
+                                                        <dd><p>if failed to parse incoming json string</p></dd>
+                                                                                                            <dt>\RtmClient\ApplicationException</dt>
+                                                        <dd><p>if missing &quot;action&quot; or &quot;body&quot; field in received PDU</p></dd>
+                                                                                                                                                            </dl>
+                                                </td>
+                                            </tr>
+                                                                            </table>
+
+                                                                            <h3>Arguments</h3>
+                                                                                    <div class="subelement argument">
+                                                <h4>$timeout_sec</h4>
+                                                <code>integer</code><p><p>The seconds part of the maximal awaiting time to be set</p></p>
+                                            </div>
+                                                                                    <div class="subelement argument">
+                                                <h4>$timeout_microsec</h4>
+                                                <code>integer</code><p><p>The microseconds part of the maximal awaiting time to be set</p></p>
+                                            </div>
+                                                                            
+                                                                    </div>
+                            </div>
+
+                        </div>
+                    
+                    
+                                                                <h3><i class="icon-custom icon-property"></i> Properties</h3>
+                                                    <a id="property_endpoint"> </a>
+                            <div class="element clickable property  protected property_endpoint" data-toggle="collapse" data-target=".property_endpoint .collapse">
+                                <h2>Connection endpoint</h2>
+                                <pre>endpoint : string</pre>
+                                <div class="labels">
+                                                                                                        </div>
+                                <div class="row collapse">
+                                    <div class="detail-description">
+                                        <div class="long_description"></div>
+
+                                        <table class="table">
+                                                                                            <tr>
+                                                    <th>
+                                                        var
+                                                    </th>
+                                                    <td>
+                                                                                                                    
+                                                                                                            </td>
+                                                </tr>
+                                                                                    </table>
+
+                                                                                    <h3>Type(s)</h3>
+                                            <code>string</code>
+                                                                            </div>
+                                </div>
+                            </div>
+                                                    <a id="property_last_id"> </a>
+                            <div class="element clickable property  protected property_last_id" data-toggle="collapse" data-target=".property_last_id .collapse">
+                                <h2>Internal ID. Used to mark PDU requests</h2>
+                                <pre>last_id : integer</pre>
+                                <div class="labels">
+                                                                                                        </div>
+                                <div class="row collapse">
+                                    <div class="detail-description">
+                                        <div class="long_description"></div>
+
+                                        <table class="table">
+                                                                                            <tr>
+                                                    <th>
+                                                        var
+                                                    </th>
+                                                    <td>
+                                                                                                                    
+                                                                                                            </td>
+                                                </tr>
+                                                                                    </table>
+
+                                                                                    <h3>Type(s)</h3>
+                                            <code>integer</code>
+                                                                            </div>
+                                </div>
+                            </div>
+                                                    <a id="property_ws"> </a>
+                            <div class="element clickable property  protected property_ws" data-toggle="collapse" data-target=".property_ws .collapse">
+                                <h2>WS client instance</h2>
+                                <pre>ws : \Rtm\WebSocket\Client</pre>
+                                <div class="labels">
+                                                                                                        </div>
+                                <div class="row collapse">
+                                    <div class="detail-description">
+                                        <div class="long_description"></div>
+
+                                        <table class="table">
+                                                                                            <tr>
+                                                    <th>
+                                                        var
+                                                    </th>
+                                                    <td>
+                                                                                                                    
+                                                                                                            </td>
+                                                </tr>
+                                                                                    </table>
+
+                                                                                    <h3>Type(s)</h3>
+                                            <code>\Rtm\WebSocket\Client</code>
+                                                                            </div>
+                                </div>
+                            </div>
+                                                    <a id="property_callbacks"> </a>
+                            <div class="element clickable property  protected property_callbacks" data-toggle="collapse" data-target=".property_callbacks .collapse">
+                                <h2>List of callbacks. Callback will be executed when getting PDU with ID matched to the callback</h2>
+                                <pre>callbacks : array</pre>
+                                <div class="labels">
+                                                                                                        </div>
+                                <div class="row collapse">
+                                    <div class="detail-description">
+                                        <div class="long_description"></div>
+
+                                        <table class="table">
+                                                                                            <tr>
+                                                    <th>
+                                                        var
+                                                    </th>
+                                                    <td>
+                                                                                                                    
+                                                                                                            </td>
+                                                </tr>
+                                                                                    </table>
+
+                                                                                    <h3>Type(s)</h3>
+                                            <code>array</code>
+                                                                            </div>
+                                </div>
+                            </div>
+                                                            </div>
+            </div>
+            <a id="\RtmClient\Connection"></a>
+            <ul class="breadcrumb">
+                <li><a href="../index.html"><i class="icon-custom icon-class"></i></a></li>
+                    
+    
+    <li><span class="divider">\</span><a href="../namespaces/RtmClient.html">RtmClient</a></li>
+
+                <li class="active"><span class="divider">\</span><a href="../classes/RtmClient.Connection.html">Connection</a></li>
+            </ul>
+        </div>
+    </div>
+
+    </div>
+
+        <footer class="span12">
+            Template is built using <a href="http://twitter.github.com/bootstrap/">Twitter Bootstrap 2</a> and icons provided by
+            <a href="http://glyphicons.com/">Glyphicons</a>.<br/>
+            Documentation is powered by <a href="http://www.phpdoc.org/">phpDocumentor </a> and<br/>
+            generated on Fri, 11 Aug 2017 08:50:06 -0700.<br/>
+    </footer>
+    </body>
+</html>
