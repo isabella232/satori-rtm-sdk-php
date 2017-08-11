@@ -52,7 +52,7 @@ require('satori-rtm-sdk-php/autoloader.php');
 
 ## Documentation and Examples
 
-In progress
+https://satori-com.github.io/satori-rtm-sdk-php/
 
 ## Logging and Debugging
 
