@@ -1,5 +1,5 @@
 {
-	"name": "satori/satori-rtm-sdk-go",
+	"name": "satori-com/satori-rtm-sdk-php",
 	"type": "library",
 	"description": "Create disruptive live data apps with Internet-scale",
 	"keywords": [
