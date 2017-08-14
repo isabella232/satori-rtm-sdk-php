@@ -171,6 +171,9 @@ class Connection
 
     /**
      * Closes connection.
+     *
+     * @param string $reason Close reason. All unprocessed callbacks will get this reason.
+     * @return true if websocket connection has been closed
      */
     public function close($reason = 'Connection closed')
     {
