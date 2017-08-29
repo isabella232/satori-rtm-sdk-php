@@ -602,9 +602,11 @@ class RtmClient extends Observable
      *
      * @example subscribe_to_channel.php Subscribe to channel
      */
-    public function subscribe($subscription_id, $options = array())
+    public function subscribe($subscription_id, callable $callback, $options = array())
     {
-        $subscription = new Subscription($subscription_id, $options, $this->logger);
+        $subscription = new Subscription($subscription_id, $callback, $options);
+        $subscription->setLogger($this->logger);
+
         $sub_pdu = $subscription->subscribePdu();
 
         $res = $this->socketSend($sub_pdu->action, $sub_pdu->body, function (Pdu $pdu) use ($subscription) {
