@@ -6,6 +6,7 @@ error_reporting(E_ALL);
 
 use RtmClient\RtmClient;
 use RtmClient\Auth\RoleAuth;
+use RtmClient\Subscription\Events;
 use RtmClient\WebSocket\ReturnCode as SocketRC;
 
 const ENDPOINT = 'YOUR_ENDPOINT';
@@ -35,22 +36,26 @@ $client->onConnected(function () {
 
 $client->connect() or die;
 
-$subscription = $client->subscribe('animals');
-$subscription->onData(function ($data) {
-    foreach ($data['messages'] as $message) {
-        if (isset($message['who']) && isset($message['where'])) {
-            echo 'Got animal ' . $message['who'] . ': ' . json_encode($message['where']) . PHP_EOL;
-        } else {
-            echo 'Got message: ' . json_encode($message) . PHP_EOL;
-        }
+$callback = function ($ctx, $type, $data) {
+    switch ($type) {
+        case Events::DATA:
+            foreach ($data['messages'] as $message) {
+                if (isset($message['who']) && isset($message['where'])) {
+                    echo 'Got animal ' . $message['who'] . ': ' . json_encode($message['where']) . PHP_EOL;
+                } else {
+                    echo 'Got message: ' . json_encode($message) . PHP_EOL;
+                }
+            }
+            break;
+        case Events::SUBSCRIBED:
+            echo 'Subscribed to: ' . $data['subscription_id'] . PHP_EOL;
+            break;
+        case Events::ERROR:
+            echo 'Subscription error! Error: ' . $err['error'] . '; Reason: ' . $err['reason'] . PHP_EOL;
+            break;
     }
-})->onSubscribed(function ($response) {
-    echo 'Subscribed to: ' . $response['subscription_id'] . PHP_EOL;
-})->onSubscribeError(function ($err) {
-    echo 'Failed to subscribe! Error: ' . $err['error'] . '; Reason: ' . $err['reason'] . PHP_EOL;
-})->onSubscriptionError(function ($err) {
-    echo 'Subscription failed. RTM sent the unsolicited error ' . $err['error'] . ': ' . $err['reason'] . PHP_EOL;
-});
+};
+$client->subscribe('animals', $callback);
 
 while (true) {
     // You must read from the incoming buffer to process incoming messages and avoid buffer overflow
@@ -72,7 +77,8 @@ while (true) {
         if ($code == RtmClient::CODE_OK) {
             echo 'Animal is published ' . json_encode($animal) . PHP_EOL;
         } else {
-            echo 'Publish request failed. Error: ' . $response['error'] . '; Reason: ' . $response['reason'] . PHP_EOL;
+            echo 'Publish request failed. ';
+            echo 'Error: ' . $response['error'] . '; Reason: ' . $response['reason'] . PHP_EOL;
         }
     });
 }
