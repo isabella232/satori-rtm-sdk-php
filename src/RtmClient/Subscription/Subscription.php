@@ -16,28 +16,28 @@ class Subscription
      *
      * @var string
      */
-    public $subscription_id;
+    protected $subscription_id;
 
     /**
      * Stored subscription position
      *
      * @var string
      */
-    public $position = '';
+    protected $position = '';
 
     /**
      * PDU bodu content
      *
      * @var array
      */
-    public $body = array();
+    protected $body = array();
 
     /**
      * Subscription options
      *
      * @var array
      */
-    public $options;
+    protected $options;
 
     /**
      * Creates a subscription model with specified options.
@@ -175,6 +175,36 @@ class Subscription
         return new Pdu('rtm/unsubscribe', array(
             'subscription_id' => $this->subscription_id,
         ));
+    }
+
+    /**
+     * Returns last known Position.
+     *
+     * @return int Position
+     */
+    public function getPosition()
+    {
+        return $this->position;
+    }
+
+    /**
+     * Returns Subscription ID.
+     *
+     * @return mixed Subscription ID
+     */
+    public function getSubscriptionId()
+    {
+        return $this->subscription_id;
+    }
+
+    /**
+     * Returns current Subscription model options.
+     *
+     * @return array Options
+     */
+    public function getOptions()
+    {
+        return $this->options;
     }
 
     /* ================================================

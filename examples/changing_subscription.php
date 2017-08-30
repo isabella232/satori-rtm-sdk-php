@@ -37,7 +37,7 @@ $callback = function ($ctx, $type, $data) {
             break;
         case Events::SUBSCRIBED:
             echo 'Subscribed to: ' . $data['subscription_id'] . PHP_EOL;
-            $opts = $ctx->options;
+            $opts = $ctx->getOptions();
             if (!empty($opts['filter'])) {
                 echo '    using view: ' . $opts['filter'] . PHP_EOL;
             } else {
