@@ -9,7 +9,6 @@ use RtmClient\Subscription\Events;
 use RtmClient\Auth\RoleAuth;
 
 use RtmClient\WebSocket\Exceptions\ConnectionException;
-use RtmClient\Exceptions\ApplicationException;
 
 const ENDPOINT = 'YOUR_ENDPOINT';
 const APP_KEY = 'YOUR_APPKEY';
@@ -39,16 +38,18 @@ function run_client(&$state)
 
 function subscribe($client, &$state)
 {
-    $options = isset($state['animals']) ? array('position' => $state['animals']->position) : array();
-    $client->subscribe('animals', function ($ctx, $type, $data) use ($client, &$state) {
+    $channel = 'animals';
+    $options = isset($state['animals']) ? $state['animals']->getOptions() : array();
+
+    $callback = function ($ctx, $type, $data) use ($client, &$state) {
         switch ($type) {
             case Events::INIT:
-                $state[$ctx->subscription_id] = $ctx;
+                $state[$ctx->getSubscriptionId()] = $ctx;
             case Events::SUBSCRIBED:
                 echo 'Subscribed to: ' . $data['subscription_id'] . PHP_EOL;
                 break;
             case Events::UNSUBSCRIBED:
-                echo 'Unsubscribed from: ' . $ctx->subscription_id . PHP_EOL;
+                echo 'Unsubscribed from: ' . $ctx->getSubscriptionId() . PHP_EOL;
                 break;
             case Events::DATA:
                 foreach ($data['messages'] as $message) {
@@ -58,14 +59,18 @@ function subscribe($client, &$state)
             case Events::ERROR:
                 if (in_array($data['error'], array('expired_position', 'out_of_sync'))) {
                     // We out of sync. Try to resubscribe without position
-                    $state[$ctx->subscription_id]->position = null;
-                    subscribe($client, $state);
+                    $sub = $state[$ctx->getSubscriptionId()];
+                    $options = $sub->getOptions();
+                    unset($options['position']);
+                    $client->subscribe($sub->getSubscriptionId(), $sub->getCallback(), $options);
                 } else {
                     echo 'Subscription failed. ' . $data['error'] . ': ' . $data['reason'] . PHP_EOL;
                 }
                 break;
         }
-    }, $options);
+    };
+
+    $client->subscribe('animals', $callback, $options);
 }
 
 $state = array();

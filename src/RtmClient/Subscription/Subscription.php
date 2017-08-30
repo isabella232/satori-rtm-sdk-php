@@ -75,9 +75,11 @@ class Subscription
         } else {
             $this->body['channel'] = $subscription_id;
         }
+
+        $this->callback(Events::INIT);
     }
 
-    protected function callback($type, $data)
+    protected function callback($type, $data = null)
     {
         $func = $this->user_callback;
         $func($this, $type, $data);
@@ -205,6 +207,16 @@ class Subscription
     public function getOptions()
     {
         return $this->options;
+    }
+
+    /**
+     * Returns user callback function for current subscription
+     *
+     * @return callable User callback
+     */
+    public function getCallback()
+    {
+        return $this->user_callback;
     }
 
     /* ================================================
