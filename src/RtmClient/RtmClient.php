@@ -593,7 +593,7 @@ class RtmClient extends Observable
      *               use the **filter** parameter, it is the channel name. Otherwise,
      *               it is a unique identifier for the channel (subscription id).
      * @param callable $callback Custom callback. Such callback will be called on any subscription events,
-     *                 descibed in {@see RtmClient\Subscription\Events}
+     *                 described in {@see RtmClient\Subscription\Events}
      *                 Callback function will get 3 arguments:
      *                      $ctx - Context. Current subscription instance
      *                      $type - Event type: {@see RtmClient\Subscription\Events}
