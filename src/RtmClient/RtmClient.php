@@ -116,39 +116,53 @@ use RtmClient\Subscription\Subscription;
  *
  * RTM client allows to subscribe to channels:
  * ```
- * $subscription = $client->subscribe('animals');
+ * $client->subscribe('animals', function ($ctx, $type, $data) {
+ *      print_r($data);
+ * });
  * ```
  *
  * Check the {@link \RtmClient\Subscription\Subscription} class to get more information
  * about the possible options.
  *
- * A subscription has an ability to specify listeners on the following Events:
+ * A subscription callback is called when the following subscription events occur:
  * ```
- * onSubscribed, onSubscribeError, onUnsubscribed, onUnsubscribeError, onData,
- * onSubscriptionError, onSubscriptionInfo, onPosition
+ * INIT - right after subscription instance is created
+ * SUBSCRIBED - after getting confirmation from Satori RTM about subscription
+ * UNSUBSCRIBED - after successful unsubscribing
+ * DATA - when getting rtm/subscription/data from Satori RTM
+ * INFO - when getting rtm/subscription/info message 
+ * ERROR - on every rtm/subscription/error or rtm/subscribe/error
  * ```
  *
- * You should specify listeners after creating a new subscription. Example:
+ * You should specify callback when creating a new subscription. Example:
  * ```
- * $subscription = $client->subscribe('animals', array(
- *     'filter' => "SELECT * FROM `animals` WHERE who = 'zebra'",
- * ))->onSubscribed(function ($response) {
- *     echo 'Subscribed to: ' . $response['subscription_id'] . PHP_EOL;
- * })->onUnsubscribed(function ($response) {
- *     echo 'Unsubscribed from: ' . $response['subscription_id'] . PHP_EOL;
- * })->onData(function ($data) {
- *     foreach ($data['messages'] as $message) {
- *         if (isset($message['who']) && isset($message['where'])) {
- *             echo 'Got animal ' . $message['who'] . ': ' . json_encode($message['where']) . PHP_EOL;
- *         } else {
- *             echo 'Got message: ' . json_encode($message) . PHP_EOL;
- *         }
+ * use RtmClient\Subscription\Events;
+ * 
+ * $callback = function ($ctx, $type, $data) {
+ *     switch ($type) {
+ *         case Events::SUBSCRIBED:
+ *             echo 'Subscribed to: ' . $ctx->getSubscriptionId() . PHP_EOL;
+ *             break;
+ *         case Events::UNSUBSCRIBED:
+ *             echo 'Unsubscribed from: ' . $ctx->getSubscriptionId() . PHP_EOL;
+ *             break;
+ *         case Events::DATA:
+ *             foreach ($data['messages'] as $message) {
+ *                 if (isset($message['who']) && isset($message['where'])) {
+ *                     echo 'Got animal ' . $message['who'] . ': ' . json_encode($message['where']) . PHP_EOL;
+ *                 } else {
+ *                     echo 'Got message: ' . json_encode($message) . PHP_EOL;
+ *                 }
+ *             }
+ *             break;
+ *         case Events::ERROR:
+ *             echo 'Subscription failed. ' . $err['error'] . ': ' . $err['reason'] . PHP_EOL;
+ *             break;
  *     }
- * })->onSubscribeError(function ($err) {
- *     echo 'Failed to subscribe! Error: ' . $err['error'] . '; Reason: ' . $err['reason'] . PHP_EOL;
- * })->onSubscriptionError(function ($err) {
- *     echo 'Subscription failed. RTM sent the unsolicited error ' . $err['error'] . ': ' . $err['reason'] . PHP_EOL;
- * });
+ * };
+ * $subscription = $client->subscribe('animals', $callback, array(
+ *     'filter' => "SELECT * FROM `animals` WHERE who = 'zebra'",
+ * ));
  * ```
  *
  * Read/Write workflow
@@ -224,10 +238,12 @@ use RtmClient\Subscription\Subscription;
  * ```
  * $messages_count = 0;
  * $client = new RtmClient(ENDPOINT, APP_KEY);
- * $client->subscribe(CHANNEL)->onData(function ($data) use (&$messages_count) {
- *     foreach ($data['messages'] as $message) {
- *         echo 'Got message: ' . json_encode($message) . PHP_EOL;
- *         $messages_count++;
+ * $client->subscribe(CHANNEL, function ($ctx, $type, $data) use (&$messages_count) {
+ *     if ($type == Events::DATA) {
+ *         foreach ($data['messages'] as $message) {
+ *             echo 'Got message: ' . json_encode($message) . PHP_EOL;
+ *             $messages_count++;
+ *         }
  *     }
  * });
  *
