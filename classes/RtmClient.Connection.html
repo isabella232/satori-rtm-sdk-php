@@ -269,7 +269,7 @@ Uses WebSocket client to connect to RTM.</p>
                                             <a id="method_close"></a>
                         <div class="element clickable method public  method_close" data-toggle="collapse" data-target=".method_close .collapse">
                             <h2>Closes connection.</h2>
-                            <pre>close( $reason = &#039;Connection closed&#039;) </pre>
+                            <pre>close(string $reason = &#039;Connection closed&#039;) : true</pre>
                             <div class="labels">
                                                                                                                                                                                             </div>
 
@@ -279,28 +279,16 @@ Uses WebSocket client to connect to RTM.</p>
                                     <div class="long_description"></div>
 
                                     <table class="table">
-                                                                                    <tr>
-                                                <th>
-                                                    
-                                                </th>
-                                                <td>
-                                                                                                    </td>
-                                            </tr>
-                                                                                    <tr>
-                                                <th>
-                                                    
-                                                </th>
-                                                <td>
-                                                                                                    </td>
-                                            </tr>
                                                                                                                     </table>
 
                                                                             <h3>Arguments</h3>
                                                                                     <div class="subelement argument">
                                                 <h4>$reason</h4>
-                                                <code></code><p></p>
+                                                <code>string</code><p><p>Close reason. All unprocessed callbacks will get this reason.</p></p>
                                             </div>
                                                                             
+                                                                            <h3>Response</h3>
+                                        <code>true</code><p><p>if websocket connection has been closed</p></p>
                                                                     </div>
                             </div>
 
@@ -688,7 +676,7 @@ from Satori RTM.</p></div>
             Template is built using <a href="http://twitter.github.com/bootstrap/">Twitter Bootstrap 2</a> and icons provided by
             <a href="http://glyphicons.com/">Glyphicons</a>.<br/>
             Documentation is powered by <a href="http://www.phpdoc.org/">phpDocumentor </a> and<br/>
-            generated on Fri, 11 Aug 2017 08:50:06 -0700.<br/>
+            generated on Thu, 31 Aug 2017 05:47:18 -0700.<br/>
     </footer>
     </body>
 </html>

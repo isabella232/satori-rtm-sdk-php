@@ -125,9 +125,9 @@
         </a>
     </li>
 
-                                                                                                        <li class="method public inherited">
-        <a href="#method_fire" title="fire :: Fires event.">
-            <span class="description">Fires event.</span><pre>fire</pre>
+                                                                                                                                                                <li class="method public">
+        <a href="#method_getCallback" title="getCallback :: Returns user callback function for current subscription">
+            <span class="description">Returns user callback function for current subscription</span><pre>getCallback</pre>
         </a>
     </li>
 
@@ -149,69 +149,9 @@
         </a>
     </li>
 
-                                                                                                                                                                <li class="method public inherited">
-        <a href="#method_off" title="off :: Unsubscribes from an event.">
-            <span class="description">Unsubscribes from an event.</span><pre>off</pre>
-        </a>
-    </li>
-
-                                                                                                        <li class="method public inherited">
-        <a href="#method_on" title="on :: Adds listener for an event.">
-            <span class="description">Adds listener for an event.</span><pre>on</pre>
-        </a>
-    </li>
-
-                                                                                                        <li class="method public">
-        <a href="#method_onData" title="onData :: Fires when getting subscription/data.">
-            <span class="description">Fires when getting subscription/data.</span><pre>onData</pre>
-        </a>
-    </li>
-
-                                                                                                        <li class="method public">
+                                                                                                                                                                <li class="method public">
         <a href="#method_onPdu" title="onPdu :: Processes PDU and executes relevant actions.">
             <span class="description">Processes PDU and executes relevant actions.</span><pre>onPdu</pre>
-        </a>
-    </li>
-
-                                                                                                        <li class="method public">
-        <a href="#method_onPosition" title="onPosition :: Fires when PDU contains &#039;position&#039; field.">
-            <span class="description">Fires when PDU contains &#039;position&#039; field.</span><pre>onPosition</pre>
-        </a>
-    </li>
-
-                                                                                                        <li class="method public">
-        <a href="#method_onSubscribed" title="onSubscribed :: Fires when getting subscribe/ok.">
-            <span class="description">Fires when getting subscribe/ok.</span><pre>onSubscribed</pre>
-        </a>
-    </li>
-
-                                                                                                        <li class="method public">
-        <a href="#method_onSubscribeError" title="onSubscribeError :: Fires when getting subscribe/error.">
-            <span class="description">Fires when getting subscribe/error.</span><pre>onSubscribeError</pre>
-        </a>
-    </li>
-
-                                                                                                        <li class="method public">
-        <a href="#method_onSubscriptionError" title="onSubscriptionError :: Fires when getting subscription/error.">
-            <span class="description">Fires when getting subscription/error.</span><pre>onSubscriptionError</pre>
-        </a>
-    </li>
-
-                                                                                                        <li class="method public">
-        <a href="#method_onSubscriptionInfo" title="onSubscriptionInfo :: Fires when getting subscription/info.">
-            <span class="description">Fires when getting subscription/info.</span><pre>onSubscriptionInfo</pre>
-        </a>
-    </li>
-
-                                                                                                        <li class="method public">
-        <a href="#method_onUnsubscribed" title="onUnsubscribed :: Fires when getting unsubscribe/ok.">
-            <span class="description">Fires when getting unsubscribe/ok.</span><pre>onUnsubscribed</pre>
-        </a>
-    </li>
-
-                                                                                                        <li class="method public">
-        <a href="#method_onUnsubscribeError" title="onUnsubscribeError :: Fires when getting unsubscribe/error.">
-            <span class="description">Fires when getting unsubscribe/error.</span><pre>onUnsubscribeError</pre>
         </a>
     </li>
 
@@ -222,6 +162,12 @@
     </li>
 
                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                 <li class="method public">
+        <a href="#method_setLogger" title="setLogger :: Sets new logger that implements PSR3 Logger interface.">
+            <span class="description">Sets new logger that implements PSR3 Logger interface.</span><pre>setLogger</pre>
+        </a>
+    </li>
+
+                                                                                                        <li class="method public">
         <a href="#method_subscribePdu" title="subscribePdu :: Generates Subscribe PDU.">
             <span class="description">Generates Subscribe PDU.</span><pre>subscribePdu</pre>
         </a>
@@ -237,12 +183,17 @@
         </li>
         <li class="nav-header protected">» Protected
             <ul>
-                                                                                                                                                                                                                                                                <li class="method protected">
+                                                                                                                <li class="method protected">
+                            <a href="#method_callback" title="callback :: Calls user callback.">
+                                <span class="description">Calls user callback.</span><pre>callback</pre>
+                            </a>
+                        </li>
+                                                                                                                                                                                                                                <li class="method protected">
                             <a href="#method_markUnsubscribe" title="markUnsubscribe :: Marks subscription as unsubscribed. Fires UNSUBSCRIBED event.">
                                 <span class="description">Marks subscription as unsubscribed. Fires UNSUBSCRIBED event.</span><pre>markUnsubscribe</pre>
                             </a>
                         </li>
-                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                <li class="method protected">
+                                                                                                                                                        <li class="method protected">
                             <a href="#method_processSubscribeError" title="processSubscribeError :: Processes subscribe/ok PDU and fires event.">
                                 <span class="description">Processes subscribe/ok PDU and fires event.</span><pre>processSubscribeError</pre>
                             </a>
@@ -277,7 +228,7 @@
                                 <span class="description">Processes unsubscribe/ok PDU and changes mark subscription as unsubscribed.</span><pre>processUnsubscribeOk</pre>
                             </a>
                         </li>
-                                                                                                                    <li class="method protected">
+                                                                                                                                                        <li class="method protected">
                             <a href="#method_trackPosition" title="trackPosition :: Processes all PDU and checks if PDU has &#039;position&#039;. Fires POSITION event.">
                                 <span class="description">Processes all PDU and checks if PDU has &#039;position&#039;. Fires POSITION event.</span><pre>trackPosition</pre>
                             </a>
@@ -286,7 +237,7 @@
         </li>
         <li class="nav-header private">» Private
             <ul>
-                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                            </ul>
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                            </ul>
         </li>
         <li class="nav-header">
             <i class="icon-custom icon-constant"></i> Constants
@@ -302,13 +253,11 @@
             <div class="element class">
                 <h1>Subscription</h1>
                 <small style="display: block; text-align: right">
-                                            Extends <a href="../classes/RtmClient.Observable.html">\RtmClient\Observable</a>
                                                         </small>
                 <p class="short_description">RTM Subscription model.</p>
                 <div class="details">
                     <div class="long_description">
-                        <p>Allows to extend any struct with ability to Fire events and ability
-to listen for any events.</p>
+                        
                     </div>
                     <table class="table table-bordered">
                                                                                     <tr>
@@ -326,7 +275,7 @@ to listen for any events.</p>
                                                                 <a id="method___construct"></a>
                         <div class="element clickable method public  method___construct" data-toggle="collapse" data-target=".method___construct .collapse">
                             <h2>Creates a subscription model with specified options.</h2>
-                            <pre>__construct(string $subscription_id, array $options = array(), \Psr\Log\LoggerInterface $logger = null) </pre>
+                            <pre>__construct(string $subscription_id, callable $callback, array $options = array()) </pre>
                             <div class="labels">
                                                                                                                                                                                             </div>
 
@@ -357,42 +306,70 @@ use the <em>filter</em> parameter, it is the channel name. Otherwise,
 it is a unique identifier for the channel (subscription id).</p></p>
                                             </div>
                                                                                     <div class="subelement argument">
+                                                <h4>$callback</h4>
+                                                <code>callable</code><p><p>Custom callback. Such callback will be called on any subscription events,
+described in {@see RtmClient\Subscription\Events}
+Callback function will get 3 arguments:
+$ctx - Context. Current subscription instance
+$type - Event type: {@see RtmClient\Subscription\Events}
+$data - Type-related data. Check Protocol Data Unit (PDU)
+to get information about data content</p></p>
+                                            </div>
+                                                                                    <div class="subelement argument">
                                                 <h4>$options</h4>
-                                                <code>array</code><p><p>Subscription options. Additional subscription options for a channel subscription. These options
-are sent to RTM in the <em>body</em> element of the
+                                                <code>array</code><p><p>Subscription options. Additional subscription options for a channel
+subscription. These options are sent to RTM in the <em>body</em> element of the
 Protocol Data Unit (PDU) that represents the subscribe request.</p>
 <pre><code>               For more information about the *body* element of a PDU,
                see *RTM API* in the online docs</code></pre></p>
-                                            </div>
-                                                                                    <div class="subelement argument">
-                                                <h4>$logger</h4>
-                                                <code>\Psr\Log\LoggerInterface</code><p><p>Custom logger</p></p>
                                             </div>
                                                                             
                                                                     </div>
                             </div>
 
                         </div>
-                                            <a id="method_fire"></a>
-                        <div class="element clickable method public  method_fire inherited" data-toggle="collapse" data-target=".method_fire .collapse">
-                            <h2>Fires event.</h2>
-                            <pre>fire() </pre>
+                                            <a id="method_callback"></a>
+                        <div class="element clickable method protected  method_callback" data-toggle="collapse" data-target=".method_callback .collapse">
+                            <h2>Calls user callback.</h2>
+                            <pre>callback(string $type, array $data = null) : void</pre>
                             <div class="labels">
-                                <span class="label">inherited</span>                                                                                                                                                            </div>
+                                                                                                                                                                                            </div>
 
                             
                             <div class="row collapse">
                                 <div class="detail-description">
-                                    <div class="long_description"><p>Executes callback functions and passes data to them.</p></div>
+                                    <div class="long_description"></div>
 
                                     <table class="table">
-                                                                                    <tr>
-                                                <th>
-                                                    
-                                                </th>
-                                                <td>
-                                                                                                    </td>
-                                            </tr>
+                                                                                                                    </table>
+
+                                                                            <h3>Arguments</h3>
+                                                                                    <div class="subelement argument">
+                                                <h4>$type</h4>
+                                                <code>string</code><p><p>Events::[NAME]</p></p>
+                                            </div>
+                                                                                    <div class="subelement argument">
+                                                <h4>$data</h4>
+                                                <code>array</code><p><p>Data to be passed to user callback</p></p>
+                                            </div>
+                                                                            
+                                                                    </div>
+                            </div>
+
+                        </div>
+                                            <a id="method_getCallback"></a>
+                        <div class="element clickable method public  method_getCallback" data-toggle="collapse" data-target=".method_getCallback .collapse">
+                            <h2>Returns user callback function for current subscription</h2>
+                            <pre>getCallback() : callable</pre>
+                            <div class="labels">
+                                                                                                                                                                                            </div>
+
+                            
+                            <div class="row collapse">
+                                <div class="detail-description">
+                                    <div class="long_description"></div>
+
+                                    <table class="table">
                                                                                     <tr>
                                                 <th>
                                                     
@@ -403,6 +380,8 @@ Protocol Data Unit (PDU) that represents the subscribe request.</p>
                                                                                                                     </table>
 
                                     
+                                                                            <h3>Response</h3>
+                                        <code>callable</code><p><p>User callback</p></p>
                                                                     </div>
                             </div>
 
@@ -519,105 +498,6 @@ Protocol Data Unit (PDU) that represents the subscribe request.</p>
                             </div>
 
                         </div>
-                                            <a id="method_off"></a>
-                        <div class="element clickable method public  method_off inherited" data-toggle="collapse" data-target=".method_off .collapse">
-                            <h2>Unsubscribes from an event.</h2>
-                            <pre>off(string $event, callable $callback) </pre>
-                            <div class="labels">
-                                <span class="label">inherited</span>                                                                                                                                                            </div>
-
-                            
-                            <div class="row collapse">
-                                <div class="detail-description">
-                                    <div class="long_description"><p>Use the callback function that you used when calling &quot;on&quot;.</p></div>
-
-                                    <table class="table">
-                                                                                    <tr>
-                                                <th>
-                                                    
-                                                </th>
-                                                <td>
-                                                                                                    </td>
-                                            </tr>
-                                                                                                                    </table>
-
-                                                                            <h3>Arguments</h3>
-                                                                                    <div class="subelement argument">
-                                                <h4>$event</h4>
-                                                <code>string</code><p><p>Event name</p></p>
-                                            </div>
-                                                                                    <div class="subelement argument">
-                                                <h4>$callback</h4>
-                                                <code>callable</code><p><p>Callback function that was used when calling &quot;on&quot;</p></p>
-                                            </div>
-                                                                            
-                                                                    </div>
-                            </div>
-
-                        </div>
-                                            <a id="method_on"></a>
-                        <div class="element clickable method public  method_on inherited" data-toggle="collapse" data-target=".method_on .collapse">
-                            <h2>Adds listener for an event.</h2>
-                            <pre>on(string $event, callable $callback) </pre>
-                            <div class="labels">
-                                <span class="label">inherited</span>                                                                                                                                                            </div>
-
-                            
-                            <div class="row collapse">
-                                <div class="detail-description">
-                                    <div class="long_description"></div>
-
-                                    <table class="table">
-                                                                                    <tr>
-                                                <th>
-                                                    
-                                                </th>
-                                                <td>
-                                                                                                    </td>
-                                            </tr>
-                                                                                                                    </table>
-
-                                                                            <h3>Arguments</h3>
-                                                                                    <div class="subelement argument">
-                                                <h4>$event</h4>
-                                                <code>string</code><p><p>Event name</p></p>
-                                            </div>
-                                                                                    <div class="subelement argument">
-                                                <h4>$callback</h4>
-                                                <code>callable</code><p><p>function to be called when an event is &quot;fire&quot;</p></p>
-                                            </div>
-                                                                            
-                                                                    </div>
-                            </div>
-
-                        </div>
-                                            <a id="method_onData"></a>
-                        <div class="element clickable method public  method_onData" data-toggle="collapse" data-target=".method_onData .collapse">
-                            <h2>Fires when getting subscription/data.</h2>
-                            <pre>onData(callable $callback) : $this</pre>
-                            <div class="labels">
-                                                                                                                                                                                            </div>
-
-                            
-                            <div class="row collapse">
-                                <div class="detail-description">
-                                    <div class="long_description"><p>Helper: Fires callback on Events::DATA (incoming messages).</p></div>
-
-                                    <table class="table">
-                                                                                                                    </table>
-
-                                                                            <h3>Arguments</h3>
-                                                                                    <div class="subelement argument">
-                                                <h4>$callback</h4>
-                                                <code>callable</code><p></p>
-                                            </div>
-                                                                            
-                                                                            <h3>Response</h3>
-                                        <code>$this</code><p></p>
-                                                                    </div>
-                            </div>
-
-                        </div>
                                             <a id="method_onPdu"></a>
                         <div class="element clickable method public  method_onPdu" data-toggle="collapse" data-target=".method_onPdu .collapse">
                             <h2>Processes PDU and executes relevant actions.</h2>
@@ -641,195 +521,6 @@ Protocol Data Unit (PDU) that represents the subscribe request.</p>
                                                                             
                                                                             <h3>Response</h3>
                                         <code>true</code><p><p>if PDU has been processed, false otherwise</p></p>
-                                                                    </div>
-                            </div>
-
-                        </div>
-                                            <a id="method_onPosition"></a>
-                        <div class="element clickable method public  method_onPosition" data-toggle="collapse" data-target=".method_onPosition .collapse">
-                            <h2>Fires when PDU contains &#039;position&#039; field.</h2>
-                            <pre>onPosition(callable $callback) : $this</pre>
-                            <div class="labels">
-                                                                                                                                                                                            </div>
-
-                            
-                            <div class="row collapse">
-                                <div class="detail-description">
-                                    <div class="long_description"><p>Helper: Fires callback on Events::POSITION.</p></div>
-
-                                    <table class="table">
-                                                                                                                    </table>
-
-                                                                            <h3>Arguments</h3>
-                                                                                    <div class="subelement argument">
-                                                <h4>$callback</h4>
-                                                <code>callable</code><p></p>
-                                            </div>
-                                                                            
-                                                                            <h3>Response</h3>
-                                        <code>$this</code><p></p>
-                                                                    </div>
-                            </div>
-
-                        </div>
-                                            <a id="method_onSubscribed"></a>
-                        <div class="element clickable method public  method_onSubscribed" data-toggle="collapse" data-target=".method_onSubscribed .collapse">
-                            <h2>Fires when getting subscribe/ok.</h2>
-                            <pre>onSubscribed(callable $callback) : $this</pre>
-                            <div class="labels">
-                                                                                                                                                                                            </div>
-
-                            
-                            <div class="row collapse">
-                                <div class="detail-description">
-                                    <div class="long_description"><p>Helper: Fires callback on Events::SUBSCRIBED.</p></div>
-
-                                    <table class="table">
-                                                                                                                    </table>
-
-                                                                            <h3>Arguments</h3>
-                                                                                    <div class="subelement argument">
-                                                <h4>$callback</h4>
-                                                <code>callable</code><p></p>
-                                            </div>
-                                                                            
-                                                                            <h3>Response</h3>
-                                        <code>$this</code><p></p>
-                                                                    </div>
-                            </div>
-
-                        </div>
-                                            <a id="method_onSubscribeError"></a>
-                        <div class="element clickable method public  method_onSubscribeError" data-toggle="collapse" data-target=".method_onSubscribeError .collapse">
-                            <h2>Fires when getting subscribe/error.</h2>
-                            <pre>onSubscribeError(callable $callback) : $this</pre>
-                            <div class="labels">
-                                                                                                                                                                                            </div>
-
-                            
-                            <div class="row collapse">
-                                <div class="detail-description">
-                                    <div class="long_description"><p>Helper: Fires callback on Events::SUBSCRIBE_ERROR.</p></div>
-
-                                    <table class="table">
-                                                                                                                    </table>
-
-                                                                            <h3>Arguments</h3>
-                                                                                    <div class="subelement argument">
-                                                <h4>$callback</h4>
-                                                <code>callable</code><p></p>
-                                            </div>
-                                                                            
-                                                                            <h3>Response</h3>
-                                        <code>$this</code><p></p>
-                                                                    </div>
-                            </div>
-
-                        </div>
-                                            <a id="method_onSubscriptionError"></a>
-                        <div class="element clickable method public  method_onSubscriptionError" data-toggle="collapse" data-target=".method_onSubscriptionError .collapse">
-                            <h2>Fires when getting subscription/error.</h2>
-                            <pre>onSubscriptionError(callable $callback) : $this</pre>
-                            <div class="labels">
-                                                                                                                                                                                            </div>
-
-                            
-                            <div class="row collapse">
-                                <div class="detail-description">
-                                    <div class="long_description"><p>Helper: Fires callback on Events::SUBSCRIPTION_ERROR.</p></div>
-
-                                    <table class="table">
-                                                                                                                    </table>
-
-                                                                            <h3>Arguments</h3>
-                                                                                    <div class="subelement argument">
-                                                <h4>$callback</h4>
-                                                <code>callable</code><p></p>
-                                            </div>
-                                                                            
-                                                                            <h3>Response</h3>
-                                        <code>$this</code><p></p>
-                                                                    </div>
-                            </div>
-
-                        </div>
-                                            <a id="method_onSubscriptionInfo"></a>
-                        <div class="element clickable method public  method_onSubscriptionInfo" data-toggle="collapse" data-target=".method_onSubscriptionInfo .collapse">
-                            <h2>Fires when getting subscription/info.</h2>
-                            <pre>onSubscriptionInfo(callable $callback) : $this</pre>
-                            <div class="labels">
-                                                                                                                                                                                            </div>
-
-                            
-                            <div class="row collapse">
-                                <div class="detail-description">
-                                    <div class="long_description"><p>Helper: Fires callback on Events::SUBSCRIPTION_INFO.</p></div>
-
-                                    <table class="table">
-                                                                                                                    </table>
-
-                                                                            <h3>Arguments</h3>
-                                                                                    <div class="subelement argument">
-                                                <h4>$callback</h4>
-                                                <code>callable</code><p></p>
-                                            </div>
-                                                                            
-                                                                            <h3>Response</h3>
-                                        <code>$this</code><p></p>
-                                                                    </div>
-                            </div>
-
-                        </div>
-                                            <a id="method_onUnsubscribed"></a>
-                        <div class="element clickable method public  method_onUnsubscribed" data-toggle="collapse" data-target=".method_onUnsubscribed .collapse">
-                            <h2>Fires when getting unsubscribe/ok.</h2>
-                            <pre>onUnsubscribed(callable $callback) : $this</pre>
-                            <div class="labels">
-                                                                                                                                                                                            </div>
-
-                            
-                            <div class="row collapse">
-                                <div class="detail-description">
-                                    <div class="long_description"><p>Helper: Fires callback on Events::UNSUBSCRIBED.</p></div>
-
-                                    <table class="table">
-                                                                                                                    </table>
-
-                                                                            <h3>Arguments</h3>
-                                                                                    <div class="subelement argument">
-                                                <h4>$callback</h4>
-                                                <code>callable</code><p></p>
-                                            </div>
-                                                                            
-                                                                            <h3>Response</h3>
-                                        <code>$this</code><p></p>
-                                                                    </div>
-                            </div>
-
-                        </div>
-                                            <a id="method_onUnsubscribeError"></a>
-                        <div class="element clickable method public  method_onUnsubscribeError" data-toggle="collapse" data-target=".method_onUnsubscribeError .collapse">
-                            <h2>Fires when getting unsubscribe/error.</h2>
-                            <pre>onUnsubscribeError(callable $callback) : $this</pre>
-                            <div class="labels">
-                                                                                                                                                                                            </div>
-
-                            
-                            <div class="row collapse">
-                                <div class="detail-description">
-                                    <div class="long_description"><p>Helper: Fires callback on Events::UNSUBSCRIBE_ERROR.</p></div>
-
-                                    <table class="table">
-                                                                                                                    </table>
-
-                                                                            <h3>Arguments</h3>
-                                                                                    <div class="subelement argument">
-                                                <h4>$callback</h4>
-                                                <code>callable</code><p></p>
-                                            </div>
-                                                                            
-                                                                            <h3>Response</h3>
-                                        <code>$this</code><p></p>
                                                                     </div>
                             </div>
 
@@ -1036,6 +727,31 @@ Protocol Data Unit (PDU) that represents the subscribe request.</p>
                             </div>
 
                         </div>
+                                            <a id="method_setLogger"></a>
+                        <div class="element clickable method public  method_setLogger" data-toggle="collapse" data-target=".method_setLogger .collapse">
+                            <h2>Sets new logger that implements PSR3 Logger interface.</h2>
+                            <pre>setLogger(\Psr\Log\LoggerInterface $logger) : void</pre>
+                            <div class="labels">
+                                                                                                                                                                                            </div>
+
+                            
+                            <div class="row collapse">
+                                <div class="detail-description">
+                                    <div class="long_description"><p><a href="https://github.com/php-fig/fig-standards/blob/master/accepted/PSR-3-logger-interface.md">https://github.com/php-fig/fig-standards/blob/master/accepted/PSR-3-logger-interface.md</a></p></div>
+
+                                    <table class="table">
+                                                                                                                    </table>
+
+                                                                            <h3>Arguments</h3>
+                                                                                    <div class="subelement argument">
+                                                <h4>$logger</h4>
+                                                <code>\Psr\Log\LoggerInterface</code><p><p>Custom logger</p></p>
+                                            </div>
+                                                                            
+                                                                    </div>
+                            </div>
+
+                        </div>
                                             <a id="method_subscribePdu"></a>
                         <div class="element clickable method public  method_subscribePdu" data-toggle="collapse" data-target=".method_subscribePdu .collapse">
                             <h2>Generates Subscribe PDU.</h2>
@@ -1226,59 +942,6 @@ Protocol Data Unit (PDU) that represents the subscribe request.</p>
                                                                             </div>
                                 </div>
                             </div>
-                                                    <a id="property_events"> </a>
-                            <div class="element clickable property  protected property_events inherited" data-toggle="collapse" data-target=".property_events .collapse">
-                                <h2>List of callbacks splitted by Event name.</h2>
-                                <pre>events : array</pre>
-                                <div class="labels">
-                                    <span class="label">inherited</span>                                                                    </div>
-                                <div class="row collapse">
-                                    <div class="detail-description">
-                                        <div class="long_description"></div>
-
-                                        <table class="table">
-                                                                                            <tr>
-                                                    <th>
-                                                        var
-                                                    </th>
-                                                    <td>
-                                                                                                                    
-                                                                                                            </td>
-                                                </tr>
-                                                                                    </table>
-
-                                                                                    <h3>Type(s)</h3>
-                                            <code>array</code>
-                                                                            </div>
-                                </div>
-                            </div>
-                                                    <a id="property_stub"> </a>
-                            <div class="element clickable property  protected property_stub inherited" data-toggle="collapse" data-target=".property_stub .collapse">
-                                <h2>Stub arguments to be passed to callback.</h2>
-                                <pre>stub : array</pre>
-                                <div class="labels">
-                                    <span class="label">inherited</span>                                                                    </div>
-                                <div class="row collapse">
-                                    <div class="detail-description">
-                                        <div class="long_description"><p>Requires to avoid &quot;Missing numbers of arguments&quot; if callback function requires args,
-that were not passed to fire()</p></div>
-
-                                        <table class="table">
-                                                                                            <tr>
-                                                    <th>
-                                                        var
-                                                    </th>
-                                                    <td>
-                                                                                                                    
-                                                                                                            </td>
-                                                </tr>
-                                                                                    </table>
-
-                                                                                    <h3>Type(s)</h3>
-                                            <code>array</code>
-                                                                            </div>
-                                </div>
-                            </div>
                                                             </div>
             </div>
             <a id="\RtmClient\Subscription\Subscription"></a>
@@ -1299,7 +962,7 @@ that were not passed to fire()</p></div>
             Template is built using <a href="http://twitter.github.com/bootstrap/">Twitter Bootstrap 2</a> and icons provided by
             <a href="http://glyphicons.com/">Glyphicons</a>.<br/>
             Documentation is powered by <a href="http://www.phpdoc.org/">phpDocumentor </a> and<br/>
-            generated on Fri, 11 Aug 2017 08:50:06 -0700.<br/>
+            generated on Thu, 31 Aug 2017 05:47:18 -0700.<br/>
     </footer>
     </body>
 </html>

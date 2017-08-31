@@ -1669,7 +1669,7 @@ It means that you WILL BE blocked if incoming buffer has only part of the WebSoc
                                             <a id="method_subscribe"></a>
                         <div class="element clickable method public  method_subscribe" data-toggle="collapse" data-target=".method_subscribe .collapse">
                             <h2>Creates a subscription to the specified channel.</h2>
-                            <pre>subscribe(string $subscription_id, array $options = array()) : \RtmClient\RtmClient\Subscription\Subscription</pre>
+                            <pre>subscribe(string $subscription_id, callable $callback, array $options = array()) : void</pre>
                             <div class="labels">
                                                                                                                                                                                             </div>
 
@@ -1736,6 +1736,16 @@ use the <strong>filter</strong> parameter, it is the channel name. Otherwise,
 it is a unique identifier for the channel (subscription id).</p></p>
                                             </div>
                                                                                     <div class="subelement argument">
+                                                <h4>$callback</h4>
+                                                <code>callable</code><p><p>Custom callback. Such callback will be called on any subscription events,
+described in {@see RtmClient\Subscription\Events}
+Callback function will get 3 arguments:
+$ctx - Context. Current subscription instance
+$type - Event type: {@see RtmClient\Subscription\Events}
+$data - Type-related data. Check Protocol Data Unit (PDU)
+to get information about data content</p></p>
+                                            </div>
+                                                                                    <div class="subelement argument">
                                                 <h4>$options</h4>
                                                 <code>array</code><p><p>Additional subscription options for a channel subscription. These options
 are sent to RTM in the <strong>body</strong> element of the
@@ -1744,8 +1754,6 @@ For more information about the <strong>body</strong> element of a PDU,
 see <strong>RTM API</strong> in the online docs.</p></p>
                                             </div>
                                                                             
-                                                                            <h3>Response</h3>
-                                        <code>\RtmClient\RtmClient\Subscription\Subscription</code><p><p>subscription instance</p></p>
                                                                     </div>
                             </div>
 
@@ -2367,7 +2375,7 @@ that were not passed to fire()</p></div>
             Template is built using <a href="http://twitter.github.com/bootstrap/">Twitter Bootstrap 2</a> and icons provided by
             <a href="http://glyphicons.com/">Glyphicons</a>.<br/>
             Documentation is powered by <a href="http://www.phpdoc.org/">phpDocumentor </a> and<br/>
-            generated on Fri, 11 Aug 2017 08:50:06 -0700.<br/>
+            generated on Thu, 31 Aug 2017 05:47:18 -0700.<br/>
     </footer>
     </body>
 </html>
