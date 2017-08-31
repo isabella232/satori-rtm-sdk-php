@@ -167,8 +167,3 @@ CREDENTIALS=/full/path/to/credentials.json composer test-verbose
     ```
     $ SSL_CA_FILE=/new/cert/dir/cert.pem SSL_CA_PATH=/new/cert/dir/ php your_app/index.php
     ```
-
-  - **warn** You can disable checking of peer certificate:
-    ```
-    SSL_VERIFY_PEER=false php your_app/index.php
-    ```

@@ -52,13 +52,19 @@ class Subscription
      * @param string $subscription_id String that identifies the channel. If you do not
      *                                use the *filter* parameter, it is the channel name. Otherwise,
      *                                it is a unique identifier for the channel (subscription id).
+     * @param callable $callback Custom callback. Such callback will be called on any subscription events,
+     *                 described in {@see RtmClient\Subscription\Events}
+     *                 Callback function will get 3 arguments:
+     *                      $ctx - Context. Current subscription instance
+     *                      $type - Event type: {@see RtmClient\Subscription\Events}
+     *                      $data - Type-related data. Check Protocol Data Unit (PDU)
+     *                           to get information about data content
      * @param array $options Subscription options. Additional subscription options for a channel
      *                    subscription. These options are sent to RTM in the *body* element of the
      *                    Protocol Data Unit (PDU) that represents the subscribe request.
      *
      *                    For more information about the *body* element of a PDU,
      *                    see *RTM API* in the online docs
-     * @param \Psr\Log\LoggerInterface $logger Custom logger
      */
     public function __construct($subscription_id, callable $callback, $options = array())
     {
@@ -79,12 +85,13 @@ class Subscription
         $this->callback(Events::INIT);
     }
 
-    protected function callback($type, $data = null)
-    {
-        $func = $this->user_callback;
-        $func($this, $type, $data);
-    }
-
+    /**
+     * Sets new logger that implements PSR3 Logger interface.
+     * https://github.com/php-fig/fig-standards/blob/master/accepted/PSR-3-logger-interface.md
+     *
+     * @param \Psr\Log\LoggerInterface $logger Custom logger
+     * @return void
+     */
     public function setLogger($logger)
     {
         $this->logger = $logger;
@@ -222,6 +229,19 @@ class Subscription
     /* ================================================
      * Internal methods
      * ===============================================*/
+
+     /**
+     * Calls user callback.
+     *
+     * @param string $type Events::[NAME]
+     * @param array $data Data to be passed to user callback
+     * @return void
+     */
+    protected function callback($type, $data = null)
+    {
+        $func = $this->user_callback;
+        $func($this, $type, $data);
+    }
 
     /**
      * Processes subscribe/ok PDU and fires event.
