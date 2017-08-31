@@ -6,6 +6,7 @@ error_reporting(E_ALL);
 
 use RtmClient\RtmClient;
 use RtmClient\Auth\RoleAuth;
+use RtmClient\Subscription\Events;
 
 const ENDPOINT = 'YOUR_ENDPOINT';
 const APP_KEY = 'YOUR_APPKEY';
@@ -24,28 +25,37 @@ $client->onConnected(function () {
 
 $client->connect() or die;
 
-$subscription = $client->subscribe('animals');
-$subscription->onSubscribed(function ($response) {
-    echo 'Subscribed to: ' . $response['subscription_id'] . PHP_EOL;
-})->onData(function ($data) {
-    foreach ($data['messages'] as $message) {
-        echo 'Got message: ' . json_encode($message) . PHP_EOL;
+$callback = function ($ctx, $type, $data) {
+    switch ($type) {
+        case Events::DATA:
+            foreach ($data['messages'] as $message) {
+                echo 'Got message: ' . json_encode($message) . PHP_EOL;
+            }
+            break;
+        case Events::ERROR:
+            echo 'Failed to subscribe! Error: ' . $data['error'] . '; Reason: ' . $data['reason'] . PHP_EOL;
+            break;
+        case Events::SUBSCRIBED:
+            echo 'Subscribed to: ' . $data['subscription_id'] . PHP_EOL;
+            $opts = $ctx->getOptions();
+            if (!empty($opts['filter'])) {
+                echo '    using view: ' . $opts['filter'] . PHP_EOL;
+            } else {
+                echo '    without view' . PHP_EOL;
+            }
+            break;
     }
-})->onSubscribeError(function ($err) {
-    echo 'Failed to subscribe! Error: ' . $err['error'] . '; Reason: ' . $err['reason'] . PHP_EOL;
-});
+};
+$client->subscribe('animals', $callback);
 
 // Wait for subscribe confirmation message from RTM
 $client->waitAllReplies();
 
 // Resubscribe using filter
-$subscription = $client->subscribe('animals', array(
+$client->subscribe('animals', $callback, array(
     'filter' => "select * from animals where who like 'z%'",
     'force' => true,
 ));
-$subscription->onSubscribed(function ($response) {
-    echo 'Resubscribed to: ' . $response['subscription_id'] . PHP_EOL;
-});
 
 while (true) {
     // Read all incoming messages

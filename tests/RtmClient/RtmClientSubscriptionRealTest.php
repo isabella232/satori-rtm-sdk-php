@@ -4,6 +4,7 @@ namespace Tests\RtmClient;
 
 use Tests\RtmClientBaseTestCase;
 use RtmClient\RtmClient;
+use RtmClient\Subscription\Events;
 
 class RtmClientSubscriptionRealTest extends RtmClientBaseTestCase
 {
@@ -16,27 +17,28 @@ class RtmClientSubscriptionRealTest extends RtmClientBaseTestCase
             'error' => false,
         );
 
-        $listeners = array(
-            'onSubscribeError' => function ($err) use (&$events) {
-                // We should not be subscribed at this moment
-                $this->assertFalse($events['subscribed']);
-                $this->assertEquals($err['error'], 'invalid_format');
-                $this->assertEquals($err['reason'], 'Invalid PDU: \'position\' was invalid');
-            },
-            'onSubscribed' => function ($body) use (&$events) {
-                // First we checked wrong position error
-                $this->assertTrue($events['error']);
-            },
-        );
-        $sub = $client->subscribe($channel, array(
+        $callback = function ($ctx, $type, $body) use (&$events) {
+            switch ($type) {
+                case Events::ERROR:
+                    // We should not be subscribed at this moment
+                    $this->assertFalse($events['subscribed']);
+                    $this->assertEquals($body['error'], 'invalid_format');
+                    $this->assertEquals($body['reason'], 'Invalid PDU: \'position\' was invalid');
+                    break;
+                case Events::SUBSCRIBED:
+                    $this->assertTrue($events['error']);
+                    break;
+            }
+        };
+
+        $sub = $client->subscribe($channel, $callback, array(
             'position' => 'wrong_position',
-        ))->onSubscribed($listeners['onSubscribed'])->onSubscribeError($listeners['onSubscribeError']);
-        
+        ));
+
         $client->sockReadSync(5);
 
         // Subscribe without position
-        $sub = $client->subscribe($channel, array(
-        ))->onSubscribed($listeners['onSubscribed'])->onSubscribeError($listeners['onSubscribeError']);
+        $sub = $client->subscribe($channel, $callback);
     }
 
     public function testExpiredPosition()
@@ -45,17 +47,22 @@ class RtmClientSubscriptionRealTest extends RtmClientBaseTestCase
         $channel = $this->getChannel();
         $event = false;
 
-        $sub = $client->subscribe($channel, array(
+        $callback = function ($ctx, $type, $body) use (&$event) {
+            switch ($type) {
+                case Events::ERROR:
+                    $event = true;
+                    $this->assertEquals($body['error'], 'expired_position');
+                    $this->assertEquals($body['reason'], 'Invalid PDU: \'position\' has expired');
+                    break;
+                case Events::SUBSCRIBED:
+                    $this->fail('Should not subscribe with expired position');
+                    break;
+            }
+        };
+        $sub = $client->subscribe($channel, $callback, array(
             'position' => '123:123',
+        ));
 
-        ))->onSubscribeError(function ($err) use (&$event) {
-            $event = true;
-            $this->assertEquals($err['error'], 'expired_position');
-            $this->assertEquals($err['reason'], 'Invalid PDU: \'position\' has expired');
-        })->onSubscribed(function ($body) use (&$events) {
-            $this->fail('Should not subscribe with expired position');
-        });
-        
         $client->sockReadSync(5);
         $this->assertTrue($event);
     }
@@ -64,37 +71,40 @@ class RtmClientSubscriptionRealTest extends RtmClientBaseTestCase
     {
         $client = $this->establishConnection();
         $channel = $this->getChannel();
-        $event = false;
+        $events = array(
+            Events::ERROR => false,
+            Events::SUBSCRIBED => false,
+        );
 
-        $sub = $client->subscribe($channel, array(
+        $callback = function ($ctx, $type, $body) use (&$events) {
+            $events[$type] = true;
+        };
+        $sub = $client->subscribe($channel, $callback, array(
             'position' => 'wrong_position',
-        ))->onSubscribeError(function ($err) use (&$event) {
-            $event = true;
-        });
+        ));
         $client->sockReadSync(5);
 
-        $this->assertTrue($event);
+        $this->assertTrue($events[Events::ERROR]);
+        $this->assertFalse($events[Events::SUBSCRIBED]);
         $this->assertNull($client->getSubscription($channel));
 
-        $event = false;
-        $sub = $client->subscribe($channel, array(
+        $events[Events::ERROR] = false;
+        $sub = $client->subscribe($channel, $callback, array(
             'filter' => 'SELECT COUNT(*) FROM `test`',
-        ))->onSubscribed(function ($err) use (&$event) {
-            $event = true;
-        });
+        ));
         $client->sockReadSync(5);
-        $this->assertTrue($event);
+        $this->assertTrue($events[Events::SUBSCRIBED]);
+        $this->assertFalse($events[Events::ERROR]);
         $this->assertNotNull($client->getSubscription($channel));
 
-        $event = false;
-        $sub = $client->subscribe($channel, array(
+        $events[Events::SUBSCRIBED] = false;
+        $sub = $client->subscribe($channel, $callback, array(
             'position' => 'wrong_position',
-        ))->onSubscribeError(function ($err) use (&$event) {
-            $event = true;
-        });
+        ));
         $client->sockReadSync(5);
 
-        $this->assertTrue($event);
+        $this->assertTrue($events[Events::ERROR]);
+        $this->assertFalse($events[Events::SUBSCRIBED]);
         $this->assertNotNull($client->getSubscription($channel));
         $sub = $client->getSubscription($channel);
         $opts = $sub->getOptions();
@@ -120,21 +130,23 @@ class RtmClientSubscriptionRealTest extends RtmClientBaseTestCase
             "test\message"
         );
 
-        $sub = $client->subscribe($channel);
-        $sub->onData(function ($data) use (&$received, &$messages, $client, $channel) {
-            foreach ($data['messages'] as $message) {
-                $expected = array_shift($messages);
-                $this->assertEquals($expected, $message);
-                $received++;
-            }
+        $sub = $client->subscribe($channel, function ($ctx, $type, $body) use (&$received, &$messages, $client, $channel) {
+            switch ($type) {
+                case Events::DATA:
+                    foreach ($body['messages'] as $message) {
+                        $expected = array_shift($messages);
+                        $this->assertEquals($expected, $message);
+                        $received++;
+                    }
 
-            if (!empty($messages)) {
-                $client->publish($channel, reset($messages));
+                    if (!empty($messages)) {
+                        $client->publish($channel, reset($messages));
+                    }
+                    break;
             }
         });
-        // Subscribe
-        $client->sockReadSync(5);
 
+        $client->sockReadSync(5);
         $client->publish($channel, $messages[0]);
 
         for ($i = 0; $i <= 6 ; $i++) {
@@ -154,20 +166,25 @@ class RtmClientSubscriptionRealTest extends RtmClientBaseTestCase
             array('test' => 3),
         );
 
-        $sub = $client->subscribe($channel, array(
+        $callback = function ($ctx, $type, $body) use (&$expected, &$received, $channel, $client) {
+            switch ($type) {
+                case Events::DATA:
+                    foreach ($body['messages'] as $message) {
+                        $exp = array_shift($expected);
+                        $this->assertEquals($exp, $message);
+                        $received++;
+                    }
+                    break;
+                case Events::SUBSCRIBED:
+                    for ($i = 1; $i <= 3; $i++) {
+                        $client->publish($channel, array('test' => $i));
+                    }
+                    break;
+            }
+        };
+        $sub = $client->subscribe($channel, $callback, array(
             'filter' => 'SELECT * FROM `' . $channel . '` WHERE test != 2'
         ));
-        $sub->onData(function ($data) use (&$expected, &$received) {
-            foreach ($data['messages'] as $message) {
-                $exp = array_shift($expected);
-                $this->assertEquals($exp, $message);
-                $received++;
-            }
-        })->onSubscribed(function () use ($channel, $client) {
-            for ($i = 1; $i <= 3; $i++) {
-                $client->publish($channel, array('test' => $i));
-            }
-        });
 
         // Subscribe
         $client->sockReadSync(5);
@@ -185,12 +202,16 @@ class RtmClientSubscriptionRealTest extends RtmClientBaseTestCase
         $client = $this->establishConnection();
         $channel = $this->getChannel();
 
-        $sub = $client->subscribe($channel);
-        $sub->onSubscribed(function () use ($client, $channel) {
-            $client->publish($channel, 'test');
-        })->onData(function ($data) use (&$received) {
-            foreach ($data['messages'] as $message) {
-                $received++;
+        $sub = $client->subscribe($channel, function ($ctx, $type, $body) use ($client, $channel, &$received) {
+            switch ($type) {
+                case Events::SUBSCRIBED:
+                    $client->publish($channel, 'test');
+                    break;
+                case Events::DATA:
+                    foreach ($body['messages'] as $message) {
+                        $received++;
+                    }
+                    break;
             }
         });
 

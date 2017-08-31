@@ -592,19 +592,28 @@ class RtmClient extends Observable
      * @param string $subscription_id String that identifies the channel. If you do not
      *               use the **filter** parameter, it is the channel name. Otherwise,
      *               it is a unique identifier for the channel (subscription id).
+     * @param callable $callback Custom callback. Such callback will be called on any subscription events,
+     *                 described in {@see RtmClient\Subscription\Events}
+     *                 Callback function will get 3 arguments:
+     *                      $ctx - Context. Current subscription instance
+     *                      $type - Event type: {@see RtmClient\Subscription\Events}
+     *                      $data - Type-related data. Check Protocol Data Unit (PDU)
+     *                           to get information about data content
      * @param array $options Additional subscription options for a channel subscription. These options
      *              are sent to RTM in the **body** element of the
      *              Protocol Data Unit (PDU) that represents the subscribe request.
      *              For more information about the **body** element of a PDU,
      *              see **RTM API** in the online docs.
      * @throws ConnectionException when connection is broken, unable to connect or send/read from the connection
-     * @return RtmClient\Subscription\Subscription subscription instance
+     * @return void
      *
      * @example subscribe_to_channel.php Subscribe to channel
      */
-    public function subscribe($subscription_id, $options = array())
+    public function subscribe($subscription_id, callable $callback, $options = array())
     {
-        $subscription = new Subscription($subscription_id, $options, $this->logger);
+        $subscription = new Subscription($subscription_id, $callback, $options);
+        $subscription->setLogger($this->logger);
+
         $sub_pdu = $subscription->subscribePdu();
 
         $res = $this->socketSend($sub_pdu->action, $sub_pdu->body, function (Pdu $pdu) use ($subscription) {
@@ -613,8 +622,6 @@ class RtmClient extends Observable
             }
             $subscription->onPdu($pdu);
         });
-
-        return $subscription;
     }
 
     /**

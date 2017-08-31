@@ -4,13 +4,15 @@ namespace Tests\Subscription;
 
 use Tests\RtmClientBaseTestCase;
 use RtmClient\Subscription\Subscription;
+use RtmClient\Subscription\Events;
 use RtmClient\Pdu\Pdu;
 
 class SubscriptionIntegrationTest extends RtmClientBaseTestCase
 {
     public function testSubscribeChannelPdu()
     {
-        $subscription = new Subscription('animals');
+        $subscription = new Subscription('animals', function () {
+        });
         $sub_pdu = $subscription->subscribePdu();
 
         $this->assertInstanceOf(Pdu::class, $sub_pdu);
@@ -20,7 +22,8 @@ class SubscriptionIntegrationTest extends RtmClientBaseTestCase
 
     public function testSubscribeFilterPdu()
     {
-        $subscription = new TestSubscription('animals', array(
+        $subscription = new TestSubscription('animals', function () {
+        }, array(
             'filter' => 'select * from `animals`',
             'history' => array(
                 'count' => 10,
@@ -41,7 +44,8 @@ class SubscriptionIntegrationTest extends RtmClientBaseTestCase
 
     public function testUnsubscribePdu()
     {
-        $subscription = new Subscription('animals');
+        $subscription = new Subscription('animals', function () {
+        });
         $updu = $subscription->unsubscribePdu();
 
         $this->assertEquals('rtm/unsubscribe', $updu->action);
@@ -50,7 +54,8 @@ class SubscriptionIntegrationTest extends RtmClientBaseTestCase
 
     public function testCustomFields()
     {
-        $subscription = new TestSubscription('animals', array(
+        $subscription = new TestSubscription('animals', function () {
+        }, array(
             'aaa' => 123,
             'force' => false,
         ));
@@ -69,13 +74,15 @@ class SubscriptionIntegrationTest extends RtmClientBaseTestCase
             ),
             'fast_forward' => true,
         );
-        $subscription = new Subscription('animals', $options);
+        $subscription = new Subscription('animals', function () {
+        }, $options);
         $this->assertEquals($options, $subscription->getOptions());
     }
 
     public function testTrackPosition()
     {
-        $sub = new Subscription('animals');
+        $sub = new Subscription('animals', function () {
+        });
         $pdu = new Pdu('rtm/subscribe/ok', array(
             'position' => '123',
             'subscription_id' => 'animals',
@@ -91,16 +98,21 @@ class SubscriptionIntegrationTest extends RtmClientBaseTestCase
 
     public function testEventSubscribeUnsubscribe()
     {
-        $sub = new Subscription('animals');
         $events = 0;
-        $sub->onSubscribed(function ($body) use (&$events) {
-            $events |= 1;
-            $this->assertEquals($body['position'], '123');
-            $this->assertEquals($body['subscription_id'], 'animals');
-        })->onUnsubscribed(function ($body) use (&$events) {
-            $events |= 2;
-            $this->assertEquals($body['position'], '321');
-            $this->assertEquals($body['subscription_id'], 'animals');
+        $sub = new Subscription('animals', function ($ctx, $type, $body) use (&$events) {
+            switch ($type) {
+                case Events::SUBSCRIBED:
+                    $events |= 1;
+                    $this->assertEquals($body['position'], '123');
+                    $this->assertEquals($body['subscription_id'], 'animals');
+                    break;
+
+                case Events::UNSUBSCRIBED:
+                    $events |= 2;
+                    $this->assertEquals($body['position'], '321');
+                    $this->assertEquals($body['subscription_id'], 'animals');
+                    break;
+            }
         });
 
         $pdu = new Pdu('rtm/subscribe/ok', array(
@@ -121,16 +133,19 @@ class SubscriptionIntegrationTest extends RtmClientBaseTestCase
     public function testSubscribeError()
     {
         $event = false;
-        $sub = new Subscription('animals');
-        $sub->onSubscribeError(function ($body) use (&$event) {
-            $this->assertEquals($body['error'], 'Error');
-            $this->assertEquals($body['reason'], 'Reason');
-            $event = true;
+        $sub = new Subscription('animals', function ($ctx, $type, $body) use (&$event) {
+            switch ($type) {
+                case Events::ERROR:
+                    $this->assertEquals($body['error'], 'Sub Error');
+                    $this->assertEquals($body['reason'], 'Sub Reason');
+                    $event = true;
+                    break;
+            }
         });
 
         $pdu = new Pdu('rtm/subscribe/error', array(
-            'error' => 'Error',
-            'reason' => 'Reason',
+            'error' => 'Sub Error',
+            'reason' => 'Sub Reason',
         ));
         $sub->onPdu($pdu);
 
@@ -140,13 +155,17 @@ class SubscriptionIntegrationTest extends RtmClientBaseTestCase
     public function testSubscriptionError()
     {
         $event = 0;
-        $sub = new Subscription('animals');
-        $sub->onSubscriptionError(function ($body) use (&$event) {
-            $this->assertEquals($body['error'], 'Error');
-            $this->assertEquals($body['reason'], 'Reason');
-            $event |= 1;
-        })->onUnsubscribed(function () use (&$event) {
-            $event |= 2;
+        $sub = new Subscription('animals', function ($ctx, $type, $body) use (&$event) {
+            switch ($type) {
+                case Events::ERROR:
+                    $this->assertEquals($body['error'], 'Error');
+                    $this->assertEquals($body['reason'], 'Reason');
+                    $event |= 1;
+                    break;
+                case Events::UNSUBSCRIBED:
+                    $event |= 2;
+                    break;
+            }
         });
 
         $pdu = new Pdu('rtm/subscription/error', array(
@@ -161,11 +180,14 @@ class SubscriptionIntegrationTest extends RtmClientBaseTestCase
     public function testSubscriptionInfo()
     {
         $event = false;
-        $sub = new Subscription('animals');
-        $sub->onSubscriptionInfo(function ($body) use (&$event) {
-            $this->assertEquals($body['info'], 'Info');
-            $this->assertEquals($body['reason'], 'Reason');
-            $event = true;
+        $sub = new Subscription('animals', function ($ctx, $type, $body) use (&$event) {
+            switch ($type) {
+                case Events::INFO:
+                    $this->assertEquals($body['info'], 'Info');
+                    $this->assertEquals($body['reason'], 'Reason');
+                    $event = true;
+                    break;
+            }
         });
 
         $pdu = new Pdu('rtm/subscription/info', array(
@@ -180,16 +202,19 @@ class SubscriptionIntegrationTest extends RtmClientBaseTestCase
     public function testUnsubscribeError()
     {
         $event = false;
-        $sub = new Subscription('animals');
-        $sub->onUnsubscribeError(function ($body) use (&$event) {
-            $this->assertEquals($body['error'], 'Error');
-            $this->assertEquals($body['reason'], 'Reason');
-            $event = true;
+        $sub = new Subscription('animals', function ($ctx, $type, $body) use (&$event) {
+            switch ($type) {
+                case Events::ERROR:
+                    $this->assertEquals($body['error'], 'Unsub Error');
+                    $this->assertEquals($body['reason'], 'Unsub Reason');
+                    $event = true;
+                    break;
+            }
         });
 
         $pdu = new Pdu('rtm/unsubscribe/error', array(
-            'error' => 'Error',
-            'reason' => 'Reason',
+            'error' => 'Unsub Error',
+            'reason' => 'Unsub Reason',
         ));
         $sub->onPdu($pdu);
 
@@ -212,28 +237,33 @@ class SubscriptionIntegrationTest extends RtmClientBaseTestCase
             'messages' => $messages,
             'position' => '123',
         ));
-        $sub = new Subscription('animals');
-        $sub->onData(function ($body) use (&$messages, &$event) {
-            $event = true;
-            foreach ($body['messages'] as $message) {
-                $msg = array_shift($messages);
-                $this->assertEquals($msg, $message);
+        $sub = new Subscription('animals', function ($ctx, $type, $body) use (&$messages, &$event) {
+            switch ($type) {
+                case Events::DATA:
+                    $event = true;
+                    foreach ($body['messages'] as $message) {
+                        $msg = array_shift($messages);
+                        $this->assertEquals($msg, $message);
+                    }
+                    break;
             }
         });
 
         $sub->onPdu($pdu);
-
         $this->assertTrue($event);
     }
 
     public function testDisconnect()
     {
-        $sub = new Subscription('animals');
         $event = false;
-        $sub->onUnsubscribed(function ($body) use (&$event) {
-            $event = true;
-            $this->assertNull($body['error']);
-            $this->assertNull($body['reason']);
+        $sub = new Subscription('animals', function ($ctx, $type, $body) use (&$event) {
+            switch ($type) {
+                case Events::UNSUBSCRIBED:
+                    $event = true;
+                    $this->assertNull($body['error']);
+                    $this->assertNull($body['reason']);
+                    break;
+            }
         });
 
         $sub->processDisconnect();

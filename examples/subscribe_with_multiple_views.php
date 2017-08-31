@@ -6,6 +6,7 @@ error_reporting(E_ALL);
 
 use RtmClient\RtmClient;
 use RtmClient\Auth\RoleAuth;
+use RtmClient\Subscription\Events;
 
 const ENDPOINT = 'YOUR_ENDPOINT';
 const APP_KEY = 'YOUR_APPKEY';
@@ -24,45 +25,36 @@ $client->onConnected(function () {
 
 $client->connect() or die;
 
-// Use the same handlers for different subscriptions
-$handlers = array(
-    'onSubscribed' => function ($response) {
-        echo 'Subscribed to: ' . $response['subscription_id'] . PHP_EOL;
-    },
-    'onUnsubscribed' => function ($response) {
-        echo 'Unsubscribed from: ' . $response['subscription_id'] . PHP_EOL;
-    },
-    'onData' => function ($data) {
-        foreach ($data['messages'] as $message) {
-            if ($data['subscription_id'] == 'zebras') {
-                echo 'Got a zebra ' . json_encode($message) . PHP_EOL;
-            } else {
-                echo 'Got a count ' . json_encode($message) . PHP_EOL;
+// Use the same callback for different subscriptions
+$callback = function ($ctx, $type, $data) {
+    switch ($type) {
+        case Events::SUBSCRIBED:
+            echo 'Subscribed to: ' . $data['subscription_id'] . PHP_EOL;
+            break;
+        case Events::UNSUBSCRIBED:
+            echo 'Unsubscribed from: ' . $data['subscription_id'] . PHP_EOL;
+            break;
+        case Events::DATA:
+            foreach ($data['messages'] as $message) {
+                if ($data['subscription_id'] == 'zebras') {
+                    echo 'Got a zebra ' . json_encode($message) . PHP_EOL;
+                } else {
+                    echo 'Got a count ' . json_encode($message) . PHP_EOL;
+                }
             }
-        }
-    },
-    'onSubscribeError' => function ($err) {
-        echo 'Failed to subscribe! Error: ' . $err['error'] . '; Reason: ' . $err['reason'] . PHP_EOL;
-    },
-    'onSubscriptionError' => function ($err) {
-        echo 'Subscription failed. RTM sent the unsolicited error ' . $err['error'] . ': ' . $err['reason'] . PHP_EOL;
-    },
-);
+            break;
+        case Events::ERROR:
+            echo 'Subscription failed. ' . $err['error'] . ': ' . $err['reason'] . PHP_EOL;
+            break;
+    }
+};
 
-$zebras = $client->subscribe('zebras', array(
+$zebras = $client->subscribe('zebras', $callback, array(
     'filter' => "SELECT * FROM `animals` WHERE who = 'zebra'",
 ));
-$stats = $client->subscribe('stats', array(
+$stats = $client->subscribe('stats', $callback, array(
     'filter' => "SELECT count(*) as count, who FROM `animals` GROUP BY who",
 ));
-
-foreach (array($zebras, $stats) as $sub) {
-    $sub->onSubscribed($handlers['onSubscribed']);
-    $sub->onUnsubscribed($handlers['onUnsubscribed']);
-    $sub->onData($handlers['onData']);
-    $sub->onSubscribeError($handlers['onSubscribeError']);
-    $sub->onSubscriptionError($handlers['onSubscriptionError']);
-}
 
 // Read all incoming messages
 while (true) {

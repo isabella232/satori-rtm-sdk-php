@@ -3,6 +3,7 @@
 require('./src/autoloader.php');
 
 use RtmClient\RtmClient;
+use RtmClient\Subscription\Events;
 
 const ENDPOINT = 'YOUR_ENDPOINT';
 const APP_KEY = 'YOUR_APPKEY';
@@ -15,10 +16,11 @@ $client->onConnected(function () {
 
 $client->connect() or die;
 
-$subscription = $client->subscribe(CHANNEL);
-$subscription->onData(function ($data) {
-    foreach ($data['messages'] as $message) {
-        echo 'Got message: ' . json_encode($message) . PHP_EOL;
+$client->subscribe(CHANNEL, function ($ctx, $type, $data) {
+    if ($type == Events::DATA) {
+        foreach ($data['messages'] as $message) {
+            echo 'Got message: ' . json_encode($message) . PHP_EOL;
+        }
     }
 });
 

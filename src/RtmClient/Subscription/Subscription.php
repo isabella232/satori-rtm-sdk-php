@@ -9,7 +9,7 @@ use RtmClient\Logger\Logger;
 /**
  * RTM Subscription model.
  */
-class Subscription extends Observable
+class Subscription
 {
     /**
      * Subscription identifier
@@ -52,18 +52,19 @@ class Subscription extends Observable
      * @param string $subscription_id String that identifies the channel. If you do not
      *                                use the *filter* parameter, it is the channel name. Otherwise,
      *                                it is a unique identifier for the channel (subscription id).
-     * @param array $options Subscription options. Additional subscription options for a channel subscription. These options
-     *                    are sent to RTM in the *body* element of the
+     * @param array $options Subscription options. Additional subscription options for a channel
+     *                    subscription. These options are sent to RTM in the *body* element of the
      *                    Protocol Data Unit (PDU) that represents the subscribe request.
      *
      *                    For more information about the *body* element of a PDU,
      *                    see *RTM API* in the online docs
      * @param \Psr\Log\LoggerInterface $logger Custom logger
      */
-    public function __construct($subscription_id, $options = array(), $logger = null)
+    public function __construct($subscription_id, callable $callback, $options = array())
     {
-        $this->logger = !empty($logger) ? $logger : new Logger();
+        $this->logger = new Logger();
         $this->options = $options;
+        $this->user_callback = $callback;
 
         $this->subscription_id = $subscription_id;
 
@@ -74,8 +75,21 @@ class Subscription extends Observable
         } else {
             $this->body['channel'] = $subscription_id;
         }
+
+        $this->callback(Events::INIT);
     }
-    
+
+    protected function callback($type, $data = null)
+    {
+        $func = $this->user_callback;
+        $func($this, $type, $data);
+    }
+
+    public function setLogger($logger)
+    {
+        $this->logger = $logger;
+    }
+
     /**
      * Processes PDU and executes relevant actions.
      *
@@ -117,8 +131,10 @@ class Subscription extends Observable
 
             default:
                 $this->logger->error('Unprocessed subscription PDU: ' . $pdu->stringify());
-                $this->Fire(Events::ERROR, array(-2, 'Unprocessed subscription PDU: ' . $pdu->stringify()));
-                
+                $this->callback(Events::ERROR, array(
+                    'error' => 'unprocessed_pdu',
+                    'reason' => 'Unprocessed subscription PDU: ' . $pdu->stringify(),
+                ));
                 return false;
         }
 
@@ -193,112 +209,14 @@ class Subscription extends Observable
         return $this->options;
     }
 
-    /* ================================================
-     * Events helpers
-     * ===============================================*/
-
     /**
-     * Fires when getting subscribe/ok.
-     * Helper: Fires callback on Events::SUBSCRIBED.
+     * Returns user callback function for current subscription
      *
-     * @param callable $callback
-     * @return $this
+     * @return callable User callback
      */
-    public function onSubscribed(callable $callback)
+    public function getCallback()
     {
-        $this->on(Events::SUBSCRIBED, $callback);
-        return $this;
-    }
-
-    /**
-     * Fires when getting subscribe/error.
-     * Helper: Fires callback on Events::SUBSCRIBE_ERROR.
-     *
-     * @param callable $callback
-     * @return $this
-     */
-    public function onSubscribeError(callable $callback)
-    {
-        $this->on(Events::SUBSCRIBE_ERROR, $callback);
-        return $this;
-    }
-
-    /**
-     * Fires when getting unsubscribe/ok.
-     * Helper: Fires callback on Events::UNSUBSCRIBED.
-     *
-     * @param callable $callback
-     * @return $this
-     */
-    public function onUnsubscribed(callable $callback)
-    {
-        $this->on(Events::UNSUBSCRIBED, $callback);
-        return $this;
-    }
-
-    /**
-     * Fires when getting unsubscribe/error.
-     * Helper: Fires callback on Events::UNSUBSCRIBE_ERROR.
-     *
-     * @param callable $callback
-     * @return $this
-     */
-    public function onUnsubscribeError(callable $callback)
-    {
-        $this->on(Events::UNSUBSCRIBE_ERROR, $callback);
-        return $this;
-    }
-
-    /**
-     * Fires when getting subscription/data.
-     * Helper: Fires callback on Events::DATA (incoming messages).
-     *
-     * @param callable $callback
-     * @return $this
-     */
-    public function onData(callable $callback)
-    {
-        $this->on(Events::DATA, $callback);
-        return $this;
-    }
-
-    /**
-     * Fires when getting subscription/error.
-     * Helper: Fires callback on Events::SUBSCRIPTION_ERROR.
-     *
-     * @param callable $callback
-     * @return $this
-     */
-    public function onSubscriptionError(callable $callback)
-    {
-        $this->on(Events::SUBSCRIPTION_ERROR, $callback);
-        return $this;
-    }
-
-    /**
-     * Fires when getting subscription/info.
-     * Helper: Fires callback on Events::SUBSCRIPTION_INFO.
-     *
-     * @param callable $callback
-     * @return $this
-     */
-    public function onSubscriptionInfo(callable $callback)
-    {
-        $this->on(Events::SUBSCRIPTION_INFO, $callback);
-        return $this;
-    }
-
-    /**
-     * Fires when PDU contains 'position' field.
-     * Helper: Fires callback on Events::POSITION.
-     *
-     * @param callable $callback
-     * @return $this
-     */
-    public function onPosition(callable $callback)
-    {
-        $this->on(Events::POSITION, $callback);
-        return $this;
+        return $this->user_callback;
     }
 
     /* ================================================
@@ -314,7 +232,7 @@ class Subscription extends Observable
     protected function processSubscribeOk($body)
     {
         $this->logger->info('Subscribed (' . $this->subscription_id . ')');
-        $this->Fire(Events::SUBSCRIBED, $body);
+        $this->callback(Events::SUBSCRIBED, $body);
     }
 
     /**
@@ -325,8 +243,9 @@ class Subscription extends Observable
      */
     protected function processSubscribeError($body)
     {
-        $this->logger->error('Subscribe Error (' . $this->subscription_id . '): ' . $body['error'] . ': ' . $body['reason']);
-        $this->Fire(Events::SUBSCRIBE_ERROR, $body);
+        $this->logger->error('Subscribe Error (' . $this->subscription_id . '): '
+            . $body['error'] . ': ' . $body['reason']);
+        $this->callback(Events::ERROR, $body);
     }
 
     /**
@@ -337,8 +256,9 @@ class Subscription extends Observable
      */
     protected function processUnsubscribeError($body)
     {
-        $this->logger->error('Unsubscribe Error (' . $this->subscription_id . '): ' . $body['error'] . ': ' . $body['reason']);
-        $this->Fire(Events::UNSUBSCRIBE_ERROR, $body);
+        $this->logger->error('Unsubscribe Error (' . $this->subscription_id . '): '
+            . $body['error'] . ': ' . $body['reason']);
+        $this->callback(Events::ERROR, $body);
     }
 
     /**
@@ -349,7 +269,7 @@ class Subscription extends Observable
      */
     protected function processSubscriptionData($body)
     {
-        $this->Fire(Events::DATA, $body);
+        $this->callback(Events::DATA, $body);
     }
 
     /**
@@ -361,8 +281,9 @@ class Subscription extends Observable
     protected function processSubscriptionError($body)
     {
         $this->markUnsubscribe();
-        $this->logger->error('Subscription Error (' . $this->subscription_id . '): ' . $body['error'] . ': ' . $body['reason']);
-        $this->Fire(Events::SUBSCRIPTION_ERROR, $body);
+        $this->logger->error('Subscription Error (' . $this->subscription_id . '): '
+            . $body['error'] . ': ' . $body['reason']);
+        $this->callback(Events::ERROR, $body);
     }
 
     /**
@@ -373,8 +294,9 @@ class Subscription extends Observable
      */
     protected function processSubscriptionInfo($body)
     {
-        $this->logger->info('Subscription Info (' . $this->subscription_id . '): ' . $body['info'] . ': ' . $body['reason']);
-        $this->Fire(Events::SUBSCRIPTION_INFO, $body);
+        $this->logger->info('Subscription Info (' . $this->subscription_id . '): '
+            . $body['info'] . ': ' . $body['reason']);
+        $this->callback(Events::INFO, $body);
     }
 
     /**
@@ -398,7 +320,6 @@ class Subscription extends Observable
     {
         if (isset($body['position'])) {
             $this->position = $body['position'];
-            $this->Fire(Events::POSITION, $body['position']);
         }
     }
 
@@ -411,6 +332,6 @@ class Subscription extends Observable
     protected function markUnsubscribe($body = array())
     {
         $this->logger->info('Unsubscribed (' . $this->subscription_id . ')');
-        $this->Fire(Events::UNSUBSCRIBED, $body);
+        $this->callback(Events::UNSUBSCRIBED, $body);
     }
 }
