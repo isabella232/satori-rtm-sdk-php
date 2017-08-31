@@ -15,7 +15,7 @@
 	],
 	"homepage": "https://www.satori.com/",
 	"license": "BSD-3-Clause-Custom",
-	"version": "0.0.1-beta",
+	"version": "0.0.2",
 	"authors": [{
 		"name": "Satori SDK Team",
 		"email": "sdk@satori.com"
