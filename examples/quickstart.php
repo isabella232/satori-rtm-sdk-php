@@ -28,9 +28,11 @@ echo '	authenticate? = ' . json_encode(!empty($options['auth'])) . PHP_EOL;
 $client = new RtmClient(ENDPOINT, APP_KEY, $options);
 $client->onConnected(function () {
     echo 'Connected to Satori RTM and authenticated as ' . ROLE . PHP_EOL;
-})->onDisconnected(function () {
+});
+$client->onDisconnected(function () {
     echo 'Disconnected' . PHP_EOL;
-})->onError(function ($type, $error) {
+});
+$client->onError(function ($type, $error) {
     echo "Type: $type; Error: $error[message] ($error[code])" . PHP_EOL;
 });
 
@@ -57,11 +59,10 @@ $callback = function ($ctx, $type, $data) {
 };
 $client->subscribe('animals', $callback);
 
-while (true) {
-    // You must read from the incoming buffer to process incoming messages and avoid buffer overflow
-    // Let's read incoming messages for 2 seconds
-    $client->sockReadFor(2);
+// Wait for subscribe/ok or subscribe/error reply
+$client->waitAllReplies();
 
+while (true) {
     $lat = 34.134358 + rand(0, 100)/10000;
     $lon = -118.321506 + rand(0, 100)/10000;
 
@@ -81,4 +82,8 @@ while (true) {
             echo 'Error: ' . $response['error'] . '; Reason: ' . $response['reason'] . PHP_EOL;
         }
     });
+
+    // You must read from the incoming buffer to process incoming messages and avoid buffer overflow
+    // Let's read all incoming messages for 2 seconds
+    $client->sockReadFor(2);
 }
