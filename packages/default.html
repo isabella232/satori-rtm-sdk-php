@@ -372,39 +372,53 @@ Subscriptions
 
 RTM client allows to subscribe to channels:
 ```
-$subscription = $client-&gt;subscribe(&#039;animals&#039;);
+$client-&gt;subscribe(&#039;animals&#039;, function ($ctx, $type, $data) {
+     print_r($data);
+});
 ```
 
 Check the [\RtmClient\Subscription\Subscription](../classes/RtmClient.Subscription.Subscription.html) class to get more information
 about the possible options.
 
-A subscription has an ability to specify listeners on the following Events:
+A subscription callback is called when the following subscription events occur:
 ```
-onSubscribed, onSubscribeError, onUnsubscribed, onUnsubscribeError, onData,
-onSubscriptionError, onSubscriptionInfo, onPosition
+INIT - right after subscription instance is created
+SUBSCRIBED - after getting confirmation from Satori RTM about subscription
+UNSUBSCRIBED - after successful unsubscribing
+DATA - when getting rtm/subscription/data from Satori RTM
+INFO - when getting rtm/subscription/info message
+ERROR - on every rtm/subscription/error or rtm/subscribe/error
 ```
 
-You should specify listeners after creating a new subscription. Example:
+You should specify callback when creating a new subscription. Example:
 ```
-$subscription = $client-&gt;subscribe(&#039;animals&#039;, array(
-    &#039;filter&#039; =&gt; &quot;SELECT * FROM `animals` WHERE who = &#039;zebra&#039;&quot;,
-))-&gt;onSubscribed(function ($response) {
-    echo &#039;Subscribed to: &#039; . $response[&#039;subscription_id&#039;] . PHP_EOL;
-})-&gt;onUnsubscribed(function ($response) {
-    echo &#039;Unsubscribed from: &#039; . $response[&#039;subscription_id&#039;] . PHP_EOL;
-})-&gt;onData(function ($data) {
-    foreach ($data[&#039;messages&#039;] as $message) {
-        if (isset($message[&#039;who&#039;]) &amp;&amp; isset($message[&#039;where&#039;])) {
-            echo &#039;Got animal &#039; . $message[&#039;who&#039;] . &#039;: &#039; . json_encode($message[&#039;where&#039;]) . PHP_EOL;
-        } else {
-            echo &#039;Got message: &#039; . json_encode($message) . PHP_EOL;
-        }
+use RtmClient\Subscription\Events;
+
+$callback = function ($ctx, $type, $data) {
+    switch ($type) {
+        case Events::SUBSCRIBED:
+            echo &#039;Subscribed to: &#039; . $ctx-&gt;getSubscriptionId() . PHP_EOL;
+            break;
+        case Events::UNSUBSCRIBED:
+            echo &#039;Unsubscribed from: &#039; . $ctx-&gt;getSubscriptionId() . PHP_EOL;
+            break;
+        case Events::DATA:
+            foreach ($data[&#039;messages&#039;] as $message) {
+                if (isset($message[&#039;who&#039;]) &amp;&amp; isset($message[&#039;where&#039;])) {
+                    echo &#039;Got animal &#039; . $message[&#039;who&#039;] . &#039;: &#039; . json_encode($message[&#039;where&#039;]) . PHP_EOL;
+                } else {
+                    echo &#039;Got message: &#039; . json_encode($message) . PHP_EOL;
+                }
+            }
+            break;
+        case Events::ERROR:
+            echo &#039;Subscription failed. &#039; . $err[&#039;error&#039;] . &#039;: &#039; . $err[&#039;reason&#039;] . PHP_EOL;
+            break;
     }
-})-&gt;onSubscribeError(function ($err) {
-    echo &#039;Failed to subscribe! Error: &#039; . $err[&#039;error&#039;] . &#039;; Reason: &#039; . $err[&#039;reason&#039;] . PHP_EOL;
-})-&gt;onSubscriptionError(function ($err) {
-    echo &#039;Subscription failed. RTM sent the unsolicited error &#039; . $err[&#039;error&#039;] . &#039;: &#039; . $err[&#039;reason&#039;] . PHP_EOL;
-});
+};
+$subscription = $client-&gt;subscribe(&#039;animals&#039;, $callback, array(
+    &#039;filter&#039; =&gt; &quot;SELECT * FROM `animals` WHERE who = &#039;zebra&#039;&quot;,
+));
 ```
 
 Read/Write workflow
@@ -480,10 +494,12 @@ use tcpReadAsync or Async helpers: [\RtmClient\RtmClient::sockReadIncoming()](..
 ```
 $messages_count = 0;
 $client = new RtmClient(ENDPOINT, APP_KEY);
-$client-&gt;subscribe(CHANNEL)-&gt;onData(function ($data) use (&amp;$messages_count) {
-    foreach ($data[&#039;messages&#039;] as $message) {
-        echo &#039;Got message: &#039; . json_encode($message) . PHP_EOL;
-        $messages_count++;
+$client-&gt;subscribe(CHANNEL, function ($ctx, $type, $data) use (&amp;$messages_count) {
+    if ($type == Events::DATA) {
+        foreach ($data[&#039;messages&#039;] as $message) {
+            echo &#039;Got message: &#039; . json_encode($message) . PHP_EOL;
+            $messages_count++;
+        }
     }
 });
 
@@ -532,7 +548,7 @@ while (true) {
             Template is built using <a href="http://twitter.github.com/bootstrap/">Twitter Bootstrap 2</a> and icons provided by
             <a href="http://glyphicons.com/">Glyphicons</a>.<br/>
             Documentation is powered by <a href="http://www.phpdoc.org/">phpDocumentor </a> and<br/>
-            generated on Thu, 31 Aug 2017 05:47:18 -0700.<br/>
+            generated on Thu, 31 Aug 2017 06:26:43 -0700.<br/>
     </footer>
     </body>
 </html>

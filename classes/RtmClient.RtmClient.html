@@ -467,32 +467,46 @@ Follow the link to get more information: <a href="https://www.satori.com/docs/us
 $client = new RtmClient(ENDPOINT, APP_KEY, $options);</code></pre>
 <h1>Subscriptions</h1>
 <p>RTM client allows to subscribe to channels:</p>
-<pre><code>$subscription = $client-&gt;subscribe('animals');</code></pre>
+<pre><code>$client-&gt;subscribe('animals', function ($ctx, $type, $data) {
+     print_r($data);
+});</code></pre>
 <p>Check the <a href="../classes/RtmClient.Subscription.Subscription.html">\RtmClient\Subscription\Subscription</a> class to get more information
 about the possible options.</p>
-<p>A subscription has an ability to specify listeners on the following Events:</p>
-<pre><code>onSubscribed, onSubscribeError, onUnsubscribed, onUnsubscribeError, onData,
-onSubscriptionError, onSubscriptionInfo, onPosition</code></pre>
-<p>You should specify listeners after creating a new subscription. Example:</p>
-<pre><code>$subscription = $client-&gt;subscribe('animals', array(
-    'filter' =&gt; "SELECT * FROM `animals` WHERE who = 'zebra'",
-))-&gt;onSubscribed(function ($response) {
-    echo 'Subscribed to: ' . $response['subscription_id'] . PHP_EOL;
-})-&gt;onUnsubscribed(function ($response) {
-    echo 'Unsubscribed from: ' . $response['subscription_id'] . PHP_EOL;
-})-&gt;onData(function ($data) {
-    foreach ($data['messages'] as $message) {
-        if (isset($message['who']) &amp;&amp; isset($message['where'])) {
-            echo 'Got animal ' . $message['who'] . ': ' . json_encode($message['where']) . PHP_EOL;
-        } else {
-            echo 'Got message: ' . json_encode($message) . PHP_EOL;
-        }
+<p>A subscription callback is called when the following subscription events occur:</p>
+<pre><code>INIT - right after subscription instance is created
+SUBSCRIBED - after getting confirmation from Satori RTM about subscription
+UNSUBSCRIBED - after successful unsubscribing
+DATA - when getting rtm/subscription/data from Satori RTM
+INFO - when getting rtm/subscription/info message
+ERROR - on every rtm/subscription/error or rtm/subscribe/error</code></pre>
+<p>You should specify callback when creating a new subscription. Example:</p>
+<pre><code>use RtmClient\Subscription\Events;
+
+$callback = function ($ctx, $type, $data) {
+    switch ($type) {
+        case Events::SUBSCRIBED:
+            echo 'Subscribed to: ' . $ctx-&gt;getSubscriptionId() . PHP_EOL;
+            break;
+        case Events::UNSUBSCRIBED:
+            echo 'Unsubscribed from: ' . $ctx-&gt;getSubscriptionId() . PHP_EOL;
+            break;
+        case Events::DATA:
+            foreach ($data['messages'] as $message) {
+                if (isset($message['who']) &amp;&amp; isset($message['where'])) {
+                    echo 'Got animal ' . $message['who'] . ': ' . json_encode($message['where']) . PHP_EOL;
+                } else {
+                    echo 'Got message: ' . json_encode($message) . PHP_EOL;
+                }
+            }
+            break;
+        case Events::ERROR:
+            echo 'Subscription failed. ' . $err['error'] . ': ' . $err['reason'] . PHP_EOL;
+            break;
     }
-})-&gt;onSubscribeError(function ($err) {
-    echo 'Failed to subscribe! Error: ' . $err['error'] . '; Reason: ' . $err['reason'] . PHP_EOL;
-})-&gt;onSubscriptionError(function ($err) {
-    echo 'Subscription failed. RTM sent the unsolicited error ' . $err['error'] . ': ' . $err['reason'] . PHP_EOL;
-});</code></pre>
+};
+$subscription = $client-&gt;subscribe('animals', $callback, array(
+    'filter' =&gt; "SELECT * FROM `animals` WHERE who = 'zebra'",
+));</code></pre>
 <h1>Read/Write workflow</h1>
 <p>Because of RtmClient has a <strong>single-threaded</strong> model you should alternate read and write operations</p>
 <p>Simple publish with ack example. We publish message and require acknowledge from
@@ -550,10 +564,12 @@ switch ($code) {
 use tcpReadAsync or Async helpers: <a href="../classes/RtmClient.RtmClient.html#method_sockReadIncoming">\RtmClient\RtmClient::sockReadIncoming()</a> or <a href="../classes/RtmClient.RtmClient.html#method_sockReadFor">\RtmClient\RtmClient::sockReadFor()</a></p>
 <pre><code>$messages_count = 0;
 $client = new RtmClient(ENDPOINT, APP_KEY);
-$client-&gt;subscribe(CHANNEL)-&gt;onData(function ($data) use (&amp;$messages_count) {
-    foreach ($data['messages'] as $message) {
-        echo 'Got message: ' . json_encode($message) . PHP_EOL;
-        $messages_count++;
+$client-&gt;subscribe(CHANNEL, function ($ctx, $type, $data) use (&amp;$messages_count) {
+    if ($type == Events::DATA) {
+        foreach ($data['messages'] as $message) {
+            echo 'Got message: ' . json_encode($message) . PHP_EOL;
+            $messages_count++;
+        }
     }
 });
 
@@ -2375,7 +2391,7 @@ that were not passed to fire()</p></div>
             Template is built using <a href="http://twitter.github.com/bootstrap/">Twitter Bootstrap 2</a> and icons provided by
             <a href="http://glyphicons.com/">Glyphicons</a>.<br/>
             Documentation is powered by <a href="http://www.phpdoc.org/">phpDocumentor </a> and<br/>
-            generated on Thu, 31 Aug 2017 05:47:18 -0700.<br/>
+            generated on Thu, 31 Aug 2017 06:26:43 -0700.<br/>
     </footer>
     </body>
 </html>
