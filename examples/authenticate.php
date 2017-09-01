@@ -10,7 +10,7 @@ use RtmClient\Auth\RoleAuth;
 const ENDPOINT = 'YOUR_ENDPOINT';
 const APP_KEY = 'YOUR_APPKEY';
 const ROLE = 'YOUR_ROLE';
-const ROLE_SECRET_KEY = 'YOUR_ROLE_SECRET';
+const ROLE_SECRET_KEY = 'YOUR_SECRET';
 
 $options = array(
     'auth' => new RoleAuth(ROLE, ROLE_SECRET_KEY),

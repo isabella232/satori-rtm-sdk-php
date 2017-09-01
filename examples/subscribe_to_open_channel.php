@@ -1,6 +1,6 @@
 <?php
 
-require('./src/autoloader.php');
+require(__DIR__ . '/../src/autoloader.php');
 
 use RtmClient\RtmClient;
 use RtmClient\Subscription\Events;

@@ -1,6 +1,6 @@
 <?php
 
-require('./src/autoloader.php');
+require(__DIR__ . '/../src/autoloader.php');
 
 error_reporting(E_ALL);
 
@@ -12,7 +12,7 @@ use RtmClient\WebSocket\ReturnCode as SocketRC;
 const ENDPOINT = 'YOUR_ENDPOINT';
 const APP_KEY = 'YOUR_APPKEY';
 const ROLE = 'YOUR_ROLE';
-const ROLE_SECRET_KEY = 'YOUR_ROLE_SECRET';
+const ROLE_SECRET_KEY = 'YOUR_SECRET';
 
 $options = array();
 
@@ -24,6 +24,9 @@ echo 'RTM client config:' . PHP_EOL;
 echo '	endpoint = ' . ENDPOINT . PHP_EOL;
 echo '	appkey = ' . APP_KEY . PHP_EOL;
 echo '	authenticate? = ' . json_encode(!empty($options['auth'])) . PHP_EOL;
+if (!empty($options['auth'])) {
+    echo '		(as ' . ROLE . ')' . PHP_EOL;
+}
 
 $client = new RtmClient(ENDPOINT, APP_KEY, $options);
 $client->onConnected(function () {
