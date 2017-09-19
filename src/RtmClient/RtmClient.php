@@ -130,14 +130,14 @@ use RtmClient\Subscription\Subscription;
  * SUBSCRIBED - after getting confirmation from Satori RTM about subscription
  * UNSUBSCRIBED - after successful unsubscribing
  * DATA - when getting rtm/subscription/data from Satori RTM
- * INFO - when getting rtm/subscription/info message 
+ * INFO - when getting rtm/subscription/info message
  * ERROR - on every rtm/subscription/error or rtm/subscribe/error
  * ```
  *
  * You should specify callback when creating a new subscription. Example:
  * ```
  * use RtmClient\Subscription\Events;
- * 
+ *
  * $callback = function ($ctx, $type, $data) {
  *     switch ($type) {
  *         case Events::SUBSCRIBED:
@@ -283,6 +283,7 @@ class RtmClient extends Observable
     const ERROR_CODE_UNKNOWN_SUBSCRIPTION = 4;
     const ERROR_CODE_NOT_CONNECTED        = 5;
     const ERROR_CODE_CLIENT_IN_USE        = 6;
+    const ERROR_CODE_WRONG_ARGS_COUNT     = 7;
 
     /**
      * Connection instance
@@ -337,12 +338,53 @@ class RtmClient extends Observable
      *       'auth'   => (Auth\iAuth) Any instance that implements iAuth instance
      *       'logger' => (\Psr\Log\LoggerInterface Custom logger
      *     ]
+     *
+     * OR
+     * sdfsdfdsfd
+     *
+     * @param RtmClient heritable_client sadfsdfsdfsdf
+     *
      * @throws ApplicationException if endpoint is empty
      * @throws ApplicationException if appkey is empty
      * @throws ApplicationException if Auth does not implement iAuth interface
+     * @throws ApplicationException if wrong arguments count passed
      * @throws BadSchemeException if endpoint has bad schema
      */
-    public function __construct($endpoint, $appkey, $options = array())
+    public function __construct()
+    {
+        $args = func_get_args();
+
+        if (count($args) == 0 || count($args) > 3) {
+            throw new ApplicationException(
+                'Wrong arguments count in constructor', self::ERROR_CODE_WRONG_ARGS_COUNT
+            );
+        }
+
+        if (count($args) == 1) {
+            $heritable_client = $args[0];
+            $this->construct_from_client($heritable_client);
+        } else {
+            call_user_func_array(array($this, 'construct'), $args);
+        }
+
+        $this->connection = new Connection($this->endpoint . '?appkey=' . $this->appkey, array(
+            'logger' => $this->logger,
+        ));
+    }
+
+    protected function construct_from_client($heritable_client)
+    {
+        $this->options = $heritable_client->options;
+        $this->logger = $heritable_client->logger;
+        $this->auth = $heritable_client->auth;
+        $this->endpoint = $heritable_client->endpoint;
+        $this->appkey = $heritable_client->appkey;
+
+        // Move observable callbacks
+        $this->events = $heritable_client->events;
+    }
+
+    protected function construct($endpoint, $appkey, $options = array())
     {
         $default_options = array(
             'auth' => null,
@@ -374,10 +416,6 @@ class RtmClient extends Observable
                 'Auth must implement iAuth interface', self::ERROR_CODE_NOT_AUTH_INTERFACE
             );
         }
-
-        $this->connection = new Connection($this->endpoint . '?appkey=' . $this->appkey, array(
-            'logger' => $this->logger,
-        ));
     }
 
     /**
@@ -423,6 +461,12 @@ class RtmClient extends Observable
 
         $this->is_connected = $this->once_connected = true;
         $this->Fire(RtmEvents::CONNECTED);
+
+        if (!empty($this->subscriptions)) {
+            foreach ($this->subscriptions as $sub) {
+                $this->subscribe($sub->getSubscriptionId(), $sub->getCallback(), $sub->getOptions());
+            }
+        }
 
         return true;
     }
@@ -629,6 +673,7 @@ class RtmClient extends Observable
     {
         $subscription = new Subscription($subscription_id, $callback, $options);
         $subscription->setLogger($this->logger);
+        $subscription->setContext('client', $this);
 
         $sub_pdu = $subscription->subscribePdu();
 
@@ -916,6 +961,11 @@ class RtmClient extends Observable
     {
         $this->on(RtmEvents::ERROR, $callback);
         return $this;
+    }
+
+    public function isConnected()
+    {
+        return $this->is_connected;
     }
 
     /* ================================================
