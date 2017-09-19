@@ -143,7 +143,7 @@ CREDENTIALS=/full/path/to/credentials.json composer test-verbose
     Connected to <endpoint>.api.satori.com.
     Escape character is '^]'.
     ```
-    If you failed to connect - check your firewall settings
+    If you fail to connect, check your firewall settings.
 
   - Check PHP SSL settings:
     ```
@@ -160,10 +160,11 @@ CREDENTIALS=/full/path/to/credentials.json composer test-verbose
         [ini_capath] =>
     )
     ```
-    Make sure that **default_cert_file** points to existing cert file and **default_default_cert_area** points
-    to the existing directory.
+    Make sure that the **default_cert_file** points to an existing cert file and **default_default_cert_area** points to the existing directory.
 
-    If your cert is in another location, you MUST TO specify path:
+    If your certs are in another location, set environment variables that point to the certs by entering the following in a console window:
     ```
-    $ SSL_CA_FILE=/new/cert/dir/cert.pem SSL_CA_PATH=/new/cert/dir/ php your_app/index.php
+    $ export SSL_CA_FILE=/new/cert/dir/cert.pem
+    $ export SSL_CA_PATH=/new/cert/dir/
+    $ php your_app/index.php
     ```
