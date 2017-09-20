@@ -263,9 +263,9 @@ use RtmClient\Subscription\Subscription;
  * An RtmClient instance is a one-time connection. It means that you cannot continue using
  * client after connection is dropped.
  *
- * To make a new connection to Satori RTM you can create a new client using the old one:
+ * To make a new connection to Satori RTM you can clone previous client:
  * ```
- * $new_client = new RtmClient($old_client);
+ * $new_client = clone $old_client;
  * $new_client->connect();
  * ```
  *
@@ -301,8 +301,6 @@ class RtmClient extends Observable
     const ERROR_CODE_UNKNOWN_SUBSCRIPTION = 4;
     const ERROR_CODE_NOT_CONNECTED        = 5;
     const ERROR_CODE_CLIENT_IN_USE        = 6;
-    const ERROR_CODE_WRONG_ARGS_COUNT     = 7;
-    const ERROR_CODE_NOT_RTM_CLIENT       = 8;
 
     /**
      * Connection instance
@@ -349,83 +347,6 @@ class RtmClient extends Observable
     /**
      * Creates new RtmClient instance.
      *
-     * **Args** (using endpoing and appkey):
-     *
-     *      __construct($endpoint, $appkey, $options = array())
-     *
-     *      string $endpoint Endpoint for RTM. Available from the Dev Portal
-     *      string $appkey Appkey used to access RTM. Available from the Dev Portal
-     *      array $options Additional parameters for the RTM client instance
-     *          $options = [
-     *              'auth'   => (Auth\iAuth) Any instance that implements iAuth instance
-     *              'logger' => (\Psr\Log\LoggerInterface Custom logger
-     *          ]
-     *
-     * **Args** (using previously created client):
-     *
-     *      __construct($heritable_client)
-     *
-     *      RtmClient $heritable_client RtmClient instance.
-     *
-     * @see RtmClient::construct Creates new RtmClient instance using heritable client.
-     * @see RtmClient::construct_from_client Creates new RtmClient instance using endpoint and appkey.
-     *
-     * @throws ApplicationException if endpoint is empty
-     * @throws ApplicationException if appkey is empty
-     * @throws ApplicationException if Auth does not implement iAuth interface
-     * @throws ApplicationException if wrong arguments count passed
-     * @throws ApplicationException if heritance client is not an instance of RtmClient
-     * @throws BadSchemeException if endpoint has bad schema
-     */
-    public function __construct()
-    {
-        $args = func_get_args();
-
-        if (count($args) == 0 || count($args) > 3) {
-            throw new ApplicationException(
-                'Wrong arguments count in constructor', self::ERROR_CODE_WRONG_ARGS_COUNT
-            );
-        }
-
-        if (count($args) == 1) {
-            $heritable_client = $args[0];
-            if ($heritable_client instanceof RtmClient) {
-                $this->construct_from_client($heritable_client);
-            } else {
-                throw new ApplicationException(
-                    'Passed argument is not an instance of RtmClient', self::ERROR_CODE_NOT_RTM_CLIENT
-                );
-            }
-        } else {
-            call_user_func_array(array($this, 'construct'), $args);
-        }
-
-        $this->connection = new Connection($this->endpoint . '?appkey=' . $this->appkey, array(
-            'logger' => $this->logger,
-        ));
-    }
-
-    /**
-     * Creates new RtmClient instance using heritable client.
-     *
-     * @param RtmClient $heritable_client RtmClient instance.
-     */
-    protected function construct_from_client($heritable_client)
-    {
-        $this->options = $heritable_client->options;
-        $this->logger = $heritable_client->logger;
-        $this->auth = $heritable_client->auth;
-        $this->endpoint = $heritable_client->endpoint;
-        $this->appkey = $heritable_client->appkey;
-        $this->subscriptions = $heritable_client->subscriptions;
-
-        // Move observable callbacks
-        $this->events = $heritable_client->events;
-    }
-
-    /**
-     * Creates new RtmClient instance using endpoint and appkey.
-     *
      * @param string $endpoint Endpoint for RTM. Available from the Dev Portal
      * @param string $appkey Appkey used to access RTM. Available from the Dev Portal
      * @param array $options Additional parameters for the RTM client instance
@@ -441,7 +362,7 @@ class RtmClient extends Observable
      * @throws ApplicationException if wrong arguments count passed
      * @throws BadSchemeException if endpoint has bad schema
      */
-    protected function construct($endpoint, $appkey, $options = array())
+    public function __construct($endpoint, $appkey, $options = array())
     {
         $default_options = array(
             'auth' => null,
@@ -473,6 +394,18 @@ class RtmClient extends Observable
                 'Auth must implement iAuth interface', self::ERROR_CODE_NOT_AUTH_INTERFACE
             );
         }
+
+        $this->initConnection();
+    }
+
+    /**
+     * Creates new RtmClient instance using heritable client.
+     */
+    public function __clone()
+    {
+        // We need to cleanup several properties from previous client
+        $this->is_connected = $this->once_connected = false;
+        $this->initConnection();
     }
 
     /**
@@ -890,6 +823,18 @@ class RtmClient extends Observable
             $seconds = intval($diff_timestamp);
             $microseconds = intval(($diff_timestamp - $seconds) * 1000000);
         } while ($current_timestamp <= $max_timestamp);
+    }
+
+    /**
+     * Initializes connection property for client.
+     *
+     * @throws BadSchemeException if client endpoint has bad schema
+     */
+    protected function initConnection()
+    {
+        $this->connection = new Connection($this->endpoint . '?appkey=' . $this->appkey, array(
+            'logger' => $this->logger,
+        ));
     }
 
     /**

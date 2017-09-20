@@ -95,7 +95,7 @@ while (true) {
 
             // Create a new RtmClient using the old one.
             // All callbacks and subscriptions will be moved to the new client.
-            $client = new RtmClient($client);
+            $client = clone $client;
             $client->connect();
         }
     }
