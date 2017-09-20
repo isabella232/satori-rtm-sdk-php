@@ -379,6 +379,7 @@ class RtmClient extends Observable
         $this->auth = $heritable_client->auth;
         $this->endpoint = $heritable_client->endpoint;
         $this->appkey = $heritable_client->appkey;
+        $this->subscriptions = $heritable_client->subscriptions;
 
         // Move observable callbacks
         $this->events = $heritable_client->events;
