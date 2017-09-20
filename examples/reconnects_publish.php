@@ -61,6 +61,9 @@ while (true) {
         // Recreate a client and connect it once again
         while (!$client->isConnected()) {
             sleep(1); // wait 1 second before reconnect
+
+            // Create a new RtmClient using the old one.
+            // All callbacks and subscriptions will be moved to the new client.
             $client = new RtmClient($client);
             $client->connect();
         }

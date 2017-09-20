@@ -126,7 +126,6 @@ use RtmClient\Subscription\Subscription;
  *
  * A subscription callback is called when the following subscription events occur:
  * ```
- * INIT - right after subscription instance is created
  * SUBSCRIBED - after getting confirmation from Satori RTM about subscription
  * UNSUBSCRIBED - after successful unsubscribing
  * DATA - when getting rtm/subscription/data from Satori RTM
@@ -141,10 +140,10 @@ use RtmClient\Subscription\Subscription;
  * $callback = function ($ctx, $type, $data) {
  *     switch ($type) {
  *         case Events::SUBSCRIBED:
- *             echo 'Subscribed to: ' . $ctx->getSubscriptionId() . PHP_EOL;
+ *             echo 'Subscribed to: ' . $ctx['subscription']->getSubscriptionId() . PHP_EOL;
  *             break;
  *         case Events::UNSUBSCRIBED:
- *             echo 'Unsubscribed from: ' . $ctx->getSubscriptionId() . PHP_EOL;
+ *             echo 'Unsubscribed from: ' . $ctx['subscription']->getSubscriptionId() . PHP_EOL;
  *             break;
  *         case Events::DATA:
  *             foreach ($data['messages'] as $message) {
@@ -258,10 +257,29 @@ use RtmClient\Subscription\Subscription;
  * }
  * ```
  *
+ * Reconnects
+ * =============================================
+ *
+ * An RtmClient instance is a one-time connection. It means that you cannot continue using
+ * client after connection is dropped.
+ *
+ * To make a new connection to Satori RTM you can create a new client using the old one:
+ * ```
+ * $new_client = new RtmClient($old_client);
+ * $new_client->connect();
+ * ```
+ *
+ * All your callbacks and subscriptions will be moved to the new client. After calling `connect`
+ * client tries to restore your previous subscriptions using last know **position** for these
+ * subscriptions. See *reconnects* examples.
+ *
  * @example authenticate.php Authentication example
- * @example test_installation.php Event handlers example
- * @example subscribe_to_channel.php Subscription example
+ * @example changing_subscription.php Change filter of existing subscription.
  * @example publish.php Publish example
+ * @example reconnects_publish.php Continunously publish with processing disconnects.
+ * @example reconnects_subscription.php Continunously publish and restore subscription on disconnects.
+ * @example subscribe_to_channel.php Subscription example
+ * @example test_installation.php Event handlers example
  */
 class RtmClient extends Observable
 {
@@ -284,6 +302,7 @@ class RtmClient extends Observable
     const ERROR_CODE_NOT_CONNECTED        = 5;
     const ERROR_CODE_CLIENT_IN_USE        = 6;
     const ERROR_CODE_WRONG_ARGS_COUNT     = 7;
+    const ERROR_CODE_NOT_RTM_CLIENT       = 8;
 
     /**
      * Connection instance
@@ -330,24 +349,32 @@ class RtmClient extends Observable
     /**
      * Creates new RtmClient instance.
      *
-     * @param string $endpoint Endpoint for RTM. Available from the Dev Portal
-     * @param string $appkey Appkey used to access RTM. Available from the Dev Portal
-     * @param array $options Additional parameters for the RTM client instance
+     * **Args** (using endpoing and appkey):
      *
-     *     $options = [
-     *       'auth'   => (Auth\iAuth) Any instance that implements iAuth instance
-     *       'logger' => (\Psr\Log\LoggerInterface Custom logger
-     *     ]
+     *      __construct($endpoint, $appkey, $options = array())
      *
-     * OR
-     * sdfsdfdsfd
+     *      string $endpoint Endpoint for RTM. Available from the Dev Portal
+     *      string $appkey Appkey used to access RTM. Available from the Dev Portal
+     *      array $options Additional parameters for the RTM client instance
+     *          $options = [
+     *              'auth'   => (Auth\iAuth) Any instance that implements iAuth instance
+     *              'logger' => (\Psr\Log\LoggerInterface Custom logger
+     *          ]
      *
-     * @param RtmClient heritable_client sadfsdfsdfsdf
+     * **Args** (using previously created client):
+     *
+     *      __construct($heritable_client)
+     *
+     *      RtmClient $heritable_client RtmClient instance.
+     *
+     * @see RtmClient::construct Creates new RtmClient instance using heritable client.
+     * @see RtmClient::construct_from_client Creates new RtmClient instance using endpoint and appkey.
      *
      * @throws ApplicationException if endpoint is empty
      * @throws ApplicationException if appkey is empty
      * @throws ApplicationException if Auth does not implement iAuth interface
      * @throws ApplicationException if wrong arguments count passed
+     * @throws ApplicationException if heritance client is not an instance of RtmClient
      * @throws BadSchemeException if endpoint has bad schema
      */
     public function __construct()
@@ -362,7 +389,13 @@ class RtmClient extends Observable
 
         if (count($args) == 1) {
             $heritable_client = $args[0];
-            $this->construct_from_client($heritable_client);
+            if ($heritable_client instanceof RtmClient) {
+                $this->construct_from_client($heritable_client);
+            } else {
+                throw new ApplicationException(
+                    'Passed argument is not an instance of RtmClient', self::ERROR_CODE_NOT_RTM_CLIENT
+                );
+            }
         } else {
             call_user_func_array(array($this, 'construct'), $args);
         }
@@ -372,6 +405,11 @@ class RtmClient extends Observable
         ));
     }
 
+    /**
+     * Creates new RtmClient instance using heritable client.
+     *
+     * @param RtmClient $heritable_client RtmClient instance.
+     */
     protected function construct_from_client($heritable_client)
     {
         $this->options = $heritable_client->options;
@@ -385,6 +423,24 @@ class RtmClient extends Observable
         $this->events = $heritable_client->events;
     }
 
+    /**
+     * Creates new RtmClient instance using endpoint and appkey.
+     *
+     * @param string $endpoint Endpoint for RTM. Available from the Dev Portal
+     * @param string $appkey Appkey used to access RTM. Available from the Dev Portal
+     * @param array $options Additional parameters for the RTM client instance
+     *
+     *     $options = [
+     *       'auth'   => (Auth\iAuth) Any instance that implements iAuth instance
+     *       'logger' => (\Psr\Log\LoggerInterface Custom logger
+     *     ]
+     *
+     * @throws ApplicationException if endpoint is empty
+     * @throws ApplicationException if appkey is empty
+     * @throws ApplicationException if Auth does not implement iAuth interface
+     * @throws ApplicationException if wrong arguments count passed
+     * @throws BadSchemeException if endpoint has bad schema
+     */
     protected function construct($endpoint, $appkey, $options = array())
     {
         $default_options = array(
