@@ -31,7 +31,7 @@ if (!empty($options['auth'])) {
 
 $client = new RtmClient(ENDPOINT, APP_KEY, $options);
 $client->onConnected(function () {
-    echo 'Connected to Satori RTM and authenticated as ' . ROLE . PHP_EOL;
+    echo 'Connected to Satori RTM!' . PHP_EOL;
 })->onError(function ($type, $error) use (&$state, &$client) {
     echo "Type: $type; Error: $error[message] ($error[code])" . PHP_EOL;
 });
@@ -89,7 +89,7 @@ while (true) {
             }
         });
     } catch (ConnectionException $e) {
-        echo 'OK, we will reconnect now';
+        echo 'OK, we will reconnect now' . PHP_EOL;
         while (!$client->isConnected()) {
             sleep(1); // wait 1 second before reconnect
             $client = new RtmClient($client);

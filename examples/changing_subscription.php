@@ -28,7 +28,7 @@ if (!empty($options['auth'])) {
 }
 $client = new RtmClient(ENDPOINT, APP_KEY, $options);
 $client->onConnected(function () {
-    echo 'Connected to Satori RTM and authenticated as ' . ROLE . PHP_EOL;
+    echo 'Connected to Satori RTM!' . PHP_EOL;
 })->onError(function ($type, $error) {
     echo "Type: $type; Error: $error[message] ($error[code])" . PHP_EOL;
 });
