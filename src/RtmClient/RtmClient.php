@@ -406,6 +406,12 @@ class RtmClient extends Observable
         // We need to cleanup several properties from previous client
         $this->is_connected = $this->once_connected = false;
         $this->initConnection();
+
+        $subscriptions = array();
+        foreach ($this->subscriptions as $subscription_id => $subscription) {
+            $subscriptions[$subscription_id] = clone $subscription;
+        }
+        $this->subscriptions = $subscriptions;
     }
 
     /**
