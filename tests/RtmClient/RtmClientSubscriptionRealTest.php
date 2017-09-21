@@ -218,7 +218,8 @@ class RtmClientSubscriptionRealTest extends RtmClientBaseTestCase
         });
 
         // Subscribe and wait for publish/ok
-        $client->waitAllReplies(5);
+        $client->sockReadSync(1);
+        $client->sockReadSync(1);
 
         $this->assertEquals(1, $received);
 
