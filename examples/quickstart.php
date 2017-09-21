@@ -65,6 +65,10 @@ $client->subscribe('animals', $callback);
 // Wait for subscribe/ok or subscribe/error reply
 $client->waitAllReplies();
 
+// To receive messages, the client still has to read from the socket. It does
+// this in the publishing loop, after it has finished writing to the socket, by
+// calling sockReadFor()
+
 while (true) {
     $lat = 34.134358 + rand(0, 100)/10000;
     $lon = -118.321506 + rand(0, 100)/10000;
@@ -86,7 +90,9 @@ while (true) {
         }
     });
 
-    // You must read from the incoming buffer to process incoming messages and avoid buffer overflow
-    // Let's read all incoming messages for 2 seconds
+    // Explicitly reads from the incoming message buffer to process messages sent
+    // from the channel by RTM. To avoid buffer overflow, the client does this
+    // every time it publishes a message.
+    // Reads as many messages as possible from the connection for 2 seconds
     $client->sockReadFor(2);
 }
