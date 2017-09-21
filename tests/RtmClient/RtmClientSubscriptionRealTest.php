@@ -201,11 +201,13 @@ class RtmClientSubscriptionRealTest extends RtmClientBaseTestCase
     {
         $client = $this->establishConnection();
         $channel = $this->getChannel();
+        $received = 0;
 
         $client->subscribe($channel, function ($ctx, $type, $body) use ($client, $channel, &$received) {
             switch ($type) {
                 case Events::SUBSCRIBED:
-                    $client->publish($channel, 'test');
+                    $client->publish($channel, 'test', function () {
+                    });
                     break;
                 case Events::DATA:
                     foreach ($body['messages'] as $message) {
@@ -215,14 +217,14 @@ class RtmClientSubscriptionRealTest extends RtmClientBaseTestCase
             }
         });
 
-        // Subscribe
-        $client->sockReadSync(5);
-        // Get message
-        $client->sockReadSync(2);
-        $this->assertEquals($received, 1);
+        // Subscribe and wait for publish/ok
+        $client->waitAllReplies(5);
+
+        $this->assertEquals(1, $received);
 
         $client->unsubscribe($channel);
-        $client->publish($channel, 'test');
+        $client->publish($channel, 'test', function () {
+        });
 
         // Check if we get more messages
         $client->waitAllReplies(1);
@@ -267,5 +269,29 @@ class RtmClientSubscriptionRealTest extends RtmClientBaseTestCase
         $client2->sockReadSync(1);
 
         $this->assertEquals($messages, 3);
+    }
+
+    public function testWaitAllRepliesForData()
+    {
+        $client = $this->establishConnection();
+        $channel = $this->getChannel();
+        $messages = 0;
+
+        $client->subscribe($channel, function ($ctx, $type, $data) use (&$messages) {
+            if ($type == Events::DATA) {
+                $messages += count($data['messages']);
+            }
+        });
+
+        $client->waitAllReplies(5);
+
+        $client->publish($channel, 1);
+        $client->publish($channel, 2);
+        $client->publish($channel, 3, function () {
+        });
+
+        $client->waitAllReplies(5);
+
+        $this->assertGreaterThan(0, $messages);
     }
 }

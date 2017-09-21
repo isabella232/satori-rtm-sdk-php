@@ -67,6 +67,7 @@ class Connection
     {
         $this->endpoint = $endpoint;
         $this->logger = isset($options['logger']) ? $options['logger'] : new Logger();
+        $this->on_unsolicited_pdu = isset($options['on_unsolicited_pdu']) ? $options['on_unsolicited_pdu'] : null;
 
         try {
             $this->ws = new Ws($endpoint);
@@ -161,6 +162,9 @@ class Connection
                 $callback = $this->callbacks[$pdu->id];
                 unset($this->callbacks[$pdu->id]);
                 $callback($pdu);
+            } elseif (!is_null($this->on_unsolicited_pdu)) {
+                $func = $this->on_unsolicited_pdu;
+                $func($pdu);
             }
         } elseif ($code == RC::CLOSED || $code == RC::PONG) {
             $this->logger->debug('RECV< ' . $code . ' frame (' . json_encode($data) . ')');
