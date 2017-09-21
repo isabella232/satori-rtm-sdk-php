@@ -126,25 +126,24 @@ use RtmClient\Subscription\Subscription;
  *
  * A subscription callback is called when the following subscription events occur:
  * ```
- * INIT - right after subscription instance is created
  * SUBSCRIBED - after getting confirmation from Satori RTM about subscription
  * UNSUBSCRIBED - after successful unsubscribing
  * DATA - when getting rtm/subscription/data from Satori RTM
- * INFO - when getting rtm/subscription/info message 
+ * INFO - when getting rtm/subscription/info message
  * ERROR - on every rtm/subscription/error or rtm/subscribe/error
  * ```
  *
  * You should specify callback when creating a new subscription. Example:
  * ```
  * use RtmClient\Subscription\Events;
- * 
+ *
  * $callback = function ($ctx, $type, $data) {
  *     switch ($type) {
  *         case Events::SUBSCRIBED:
- *             echo 'Subscribed to: ' . $ctx->getSubscriptionId() . PHP_EOL;
+ *             echo 'Subscribed to: ' . $ctx['subscription']->getSubscriptionId() . PHP_EOL;
  *             break;
  *         case Events::UNSUBSCRIBED:
- *             echo 'Unsubscribed from: ' . $ctx->getSubscriptionId() . PHP_EOL;
+ *             echo 'Unsubscribed from: ' . $ctx['subscription']->getSubscriptionId() . PHP_EOL;
  *             break;
  *         case Events::DATA:
  *             foreach ($data['messages'] as $message) {
@@ -258,10 +257,29 @@ use RtmClient\Subscription\Subscription;
  * }
  * ```
  *
+ * Reconnects
+ * =============================================
+ *
+ * An RtmClient instance is a one-time connection. It means that you cannot continue using
+ * client after connection is dropped.
+ *
+ * To make a new connection to Satori RTM you can clone previous client:
+ * ```
+ * $new_client = clone $old_client;
+ * $new_client->connect();
+ * ```
+ *
+ * All your callbacks and subscriptions will be moved to the new client. After calling `connect`
+ * client tries to restore your previous subscriptions using last know **position** for these
+ * subscriptions. See *reconnects* examples.
+ *
  * @example authenticate.php Authentication example
- * @example test_installation.php Event handlers example
- * @example subscribe_to_channel.php Subscription example
+ * @example changing_subscription.php Change filter of existing subscription.
  * @example publish.php Publish example
+ * @example reconnects_publish.php Continunously publish with processing disconnects.
+ * @example reconnects_subscription.php Continunously publish and restore subscription on disconnects.
+ * @example subscribe_to_channel.php Subscription example
+ * @example test_installation.php Event handlers example
  */
 class RtmClient extends Observable
 {
@@ -337,9 +355,11 @@ class RtmClient extends Observable
      *       'auth'   => (Auth\iAuth) Any instance that implements iAuth instance
      *       'logger' => (\Psr\Log\LoggerInterface Custom logger
      *     ]
+     *
      * @throws ApplicationException if endpoint is empty
      * @throws ApplicationException if appkey is empty
      * @throws ApplicationException if Auth does not implement iAuth interface
+     * @throws ApplicationException if wrong arguments count passed
      * @throws BadSchemeException if endpoint has bad schema
      */
     public function __construct($endpoint, $appkey, $options = array())
@@ -375,9 +395,23 @@ class RtmClient extends Observable
             );
         }
 
-        $this->connection = new Connection($this->endpoint . '?appkey=' . $this->appkey, array(
-            'logger' => $this->logger,
-        ));
+        $this->initConnection();
+    }
+
+    /**
+     * Creates new RtmClient instance using heritable client.
+     */
+    public function __clone()
+    {
+        // We need to cleanup several properties from previous client
+        $this->is_connected = $this->once_connected = false;
+        $this->initConnection();
+
+        $subscriptions = array();
+        foreach ($this->subscriptions as $subscription_id => $subscription) {
+            $subscriptions[$subscription_id] = clone $subscription;
+        }
+        $this->subscriptions = $subscriptions;
     }
 
     /**
@@ -423,6 +457,12 @@ class RtmClient extends Observable
 
         $this->is_connected = $this->once_connected = true;
         $this->Fire(RtmEvents::CONNECTED);
+
+        if (!empty($this->subscriptions)) {
+            foreach ($this->subscriptions as $sub) {
+                $this->subscribe($sub->getSubscriptionId(), $sub->getCallback(), $sub->getOptions());
+            }
+        }
 
         return true;
     }
@@ -629,6 +669,7 @@ class RtmClient extends Observable
     {
         $subscription = new Subscription($subscription_id, $callback, $options);
         $subscription->setLogger($this->logger);
+        $subscription->setContext('client', $this);
 
         $sub_pdu = $subscription->subscribePdu();
 
@@ -791,6 +832,18 @@ class RtmClient extends Observable
     }
 
     /**
+     * Initializes connection property for client.
+     *
+     * @throws BadSchemeException if client endpoint has bad schema
+     */
+    protected function initConnection()
+    {
+        $this->connection = new Connection($this->endpoint . '?appkey=' . $this->appkey, array(
+            'logger' => $this->logger,
+        ));
+    }
+
+    /**
      * Reads from socket connection.
      *
      * @param Ws::ASYNC_READ|Ws::SYNC_READ $mode Read mode
@@ -916,6 +969,11 @@ class RtmClient extends Observable
     {
         $this->on(RtmEvents::ERROR, $callback);
         return $this;
+    }
+
+    public function isConnected()
+    {
+        return $this->is_connected;
     }
 
     /* ================================================

@@ -7,7 +7,6 @@ namespace RtmClient\Subscription;
  */
 class Events
 {
-    const INIT = 'init';
     const SUBSCRIBED = 'subscribed';
     const UNSUBSCRIBED = 'unsubscribed';
     const DATA = 'data';

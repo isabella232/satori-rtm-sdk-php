@@ -75,14 +75,15 @@ class Subscription
         $this->subscription_id = $subscription_id;
 
         $this->body = array_merge($this->body, $options);
+        $this->context = array(
+            'subscription' => $this,
+        );
 
         if (!empty($this->body['filter'])) {
             $this->body['subscription_id'] = $subscription_id;
         } else {
             $this->body['channel'] = $subscription_id;
         }
-
-        $this->callback(Events::INIT);
     }
 
     /**
@@ -95,6 +96,11 @@ class Subscription
     public function setLogger($logger)
     {
         $this->logger = $logger;
+    }
+
+    public function setContext($key, $context)
+    {
+        $this->context[$key] = $context;
     }
 
     /**
@@ -240,7 +246,7 @@ class Subscription
     protected function callback($type, $data = null)
     {
         $func = $this->user_callback;
-        $func($this, $type, $data);
+        $func($this->context, $type, $data);
     }
 
     /**

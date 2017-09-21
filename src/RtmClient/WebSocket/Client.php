@@ -321,6 +321,9 @@ class Client
      */
     protected function readFrame($mode, $timeout_sec = 0, $timeout_microsec = 0)
     {
+        $status = -1;
+        $payload = null;
+
         // Set timeout till first data
         stream_set_timeout($this->socket, $timeout_sec, $timeout_microsec);
 

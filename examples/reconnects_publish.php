@@ -6,6 +6,7 @@ error_reporting(E_ALL);
 
 use RtmClient\RtmClient;
 use RtmClient\Auth\RoleAuth;
+use RtmClient\WebSocket\Exceptions\ConnectionException;
 
 const ENDPOINT = 'YOUR_ENDPOINT';
 const APP_KEY = 'YOUR_APPKEY';
@@ -41,19 +42,32 @@ $animal = array(
 );
 
 while (true) {
+    $timeout = 1; // 1 sec
     // Publish message with acknowledge
     echo 'Publish: ' . json_encode($animal) . PHP_EOL;
-    $client->publish("animals", $animal, function ($code, $response) {
-        if ($code == RtmClient::CODE_OK) {
-            echo 'Publish confirmed!' . PHP_EOL;
-        } else {
-            echo 'Failed to publish. Error: ' . $response['error'] . '; Reason: ' . $response['reason'] . PHP_EOL;
-        }
-    });
 
-    // Read possible response from RTM (Publish Ack)
-    $timeout = 1; // 1 sec
-    $client->waitAllReplies($timeout);
+    try {
+        $client->publish("animals", $animal, function ($code, $response) {
+            if ($code == RtmClient::CODE_OK) {
+                echo 'Publish confirmed!' . PHP_EOL;
+            } else {
+                echo 'Failed to publish. Error: ' . $response['error'] . '; Reason: ' . $response['reason'] . PHP_EOL;
+            }
+        });
+
+        // Read possible response from RTM (Publish Ack)
+        $client->waitAllReplies($timeout);
+    } catch (ConnectionException $e) {
+        // Recreate a client and connect it once again
+        while (!$client->isConnected()) {
+            sleep(1); // wait 1 second before reconnect
+
+            // Create a new RtmClient using the old one.
+            // All callbacks and subscriptions will be moved to the new client.
+            $client = clone $client;
+            $client->connect();
+        }
+    }
 
     // Update zebra coords and publish again
     $animal['where'][0] += (rand(1, 100) - 50) / 100000;
