@@ -5,6 +5,8 @@
 
 namespace RtmClient\WebSocket;
 
+use RtmClient\Logger\Logger;
+
 use RtmClient\WebSocket\Exceptions\BadSchemeException;
 use RtmClient\WebSocket\Exceptions\ConnectionException;
 use RtmClient\WebSocket\Exceptions\TimeoutException;
@@ -55,6 +57,13 @@ class Client
     protected $is_connected = false;
 
     /**
+     * Flag used for peristent connection status
+     *
+     * @var bool
+     */
+    protected $is_connection_new = true;
+
+    /**
      * Socket state after call close()
      *
      * @var boolean
@@ -70,6 +79,7 @@ class Client
      *     $options = [
      *       'timeout'       => (int) Number of seconds until the connect() system call should timeout
      *       'fragment_size' => (int) Split message to frames when exceeded fragment size limit
+     *       'logger'        => (Psr\Log\LoggerInterface) Logger
      *     ]
      */
     public function __construct($url, $options = array())
@@ -77,10 +87,12 @@ class Client
         $default = array(
             'timeout' => Client::DEFAULT_TIMEOUT_SEC,
             'fragment_size' => Client::DEFAULT_FRAGMENT_SIZE,
+            'persistent_connection' => false,
         );
 
         $this->options = array_merge($default, $options);
         $this->url = $this->parseUrl($url);
+        $this->logger = !empty($options['logger']) ? $options['logger'] : new Logger();
     }
 
     /**
@@ -125,12 +137,17 @@ class Client
             $context = @stream_context_create($ssl_opts);
         }
 
+        $flags = STREAM_CLIENT_CONNECT;
+        if ($this->options['persistent_connection']) {
+            $flags |= STREAM_CLIENT_PERSISTENT;
+        }
+
         $this->socket = @stream_socket_client(
             $endpoint,
             $errno,
             $errstr,
             $this->options['timeout'],
-            STREAM_CLIENT_CONNECT,
+            $flags,
             $context
         );
 
@@ -141,49 +158,58 @@ class Client
             );
         }
 
-        stream_set_timeout($this->socket, $this->options['timeout']);
+        // Check if connection is persistent and was reused
+        $this->is_connection_new = !$this->options['persistent_connection'] || ftell($this->socket) === 0;
 
-        $key = self::generateSecKey();
+        $this->logger->debug('Use persistent connection? ' . var_export($this->options['persistent_connection'], true));
+        $this->logger->debug('Bytes sent ' . var_export(ftell($this->socket), true));
 
-        $headers = array(
-            'Host: ' . $this->url['host'] . ":" . $this->url['port'],
-            'Connection: Upgrade',
-            'Upgrade: websocket',
-            'Sec-WebSocket-Key: ' . $key,
-            'Sec-WebSocket-Version: 13',
-        );
+        if ($this->is_connection_new) {
+            stream_set_timeout($this->socket, $this->options['timeout']);
 
-        $this->socketWrite(
-            'GET ' . $this->url['path'] . '?' . $this->url['query'] . " HTTP/1.1\r\n"
-            . implode("\r\n", $headers)
-            . "\r\n\r\n"
-        );
+            $key = self::generateSecKey();
 
-        $response = stream_get_line($this->socket, 1024, "\r\n\r\n");
-        
-        if (preg_match('#Sec-WebSocket-Accept:\s(.+)$#mUi', $response, $matches)) {
-            $server_key = $matches[1];
-            $decoded = base64_decode($server_key);
-
-            if ($decoded === false) {
-                throw new ConnectionException(
-                   'WebSocket Upgrade Failure. Unable to decode Sec-WebSocket-Accept key:' . PHP_EOL
-                    . $response, 1001
-                );
-            }
-
-            if ($decoded != sha1($key . self::WEBSOCKET_MAGIC_KEY, true)) {
-                throw new ConnectionException(
-                   'WebSocket Upgrade Failure. Wrong Sec-WebSocket-Accept key:' . PHP_EOL
-                    . $response, 1002
-                );
-            }
-        } else {
-            throw new ConnectionException(
-               'WebSocket Upgrade Failure. Server sent invalid upgrade response:' . PHP_EOL
-                . $response, 1003
+            $headers = array(
+                'Host: ' . $this->url['host'] . ":" . $this->url['port'],
+                'Connection: Upgrade',
+                'Upgrade: websocket',
+                'Sec-WebSocket-Key: ' . $key,
+                'Sec-WebSocket-Version: 13',
             );
+
+            $this->socketWrite(
+                'GET ' . $this->url['path'] . '?' . $this->url['query'] . " HTTP/1.1\r\n"
+                . implode("\r\n", $headers)
+                . "\r\n\r\n"
+            );
+
+            $response = stream_get_line($this->socket, 1024, "\r\n\r\n");
+
+            if (preg_match('#Sec-WebSocket-Accept:\s(.+)$#mUi', $response, $matches)) {
+                $server_key = $matches[1];
+                $decoded = base64_decode($server_key);
+
+                if ($decoded === false) {
+                    throw new ConnectionException(
+                    'WebSocket Upgrade Failure. Unable to decode Sec-WebSocket-Accept key:' . PHP_EOL
+                        . $response, 1001
+                    );
+                }
+
+                if ($decoded != sha1($key . self::WEBSOCKET_MAGIC_KEY, true)) {
+                    throw new ConnectionException(
+                    'WebSocket Upgrade Failure. Wrong Sec-WebSocket-Accept key:' . PHP_EOL
+                        . $response, 1002
+                    );
+                }
+            } else {
+                throw new ConnectionException(
+                'WebSocket Upgrade Failure. Server sent invalid upgrade response:' . PHP_EOL
+                    . $response, 1003
+                );
+            }
         }
+
         $this->is_connected = true;
     }
 
@@ -208,11 +234,19 @@ class Client
         foreach (str_split($status_binstr, 8) as $binstr) {
             $status_str .= chr(bindec($binstr));
         }
-        $this->send($status_str . $reason, true, OpCode::CLOSE);
-        $this->is_closing = true;
+        try {
+            $this->send($status_str . $reason, true, OpCode::CLOSE);
+            $this->is_closing = true;
 
-        // Receiving a close frame will close the socket
-        return $this->read(self::SYNC_READ, $timeout);
+            // Receiving a close frame will close the socket
+            return $this->read(self::SYNC_READ, $timeout);
+        } catch (ConnectionException $e) {
+            // Broken connection
+            fclose($this->socket);
+            $this->is_connected = false;
+
+            return array(ReturnCode::NOT_CONNECTED, '');
+        }
     }
 
     /**
@@ -304,6 +338,17 @@ class Client
         }
 
         return array($code, $response);
+    }
+
+    /**
+     * Checks if connection was newly created.
+     *
+     * @return boolean true if connection was newly established.
+     *                 false if it is a persistent connection that was established before.
+     */
+    public function isConnectionNew()
+    {
+        return $this->is_connection_new;
     }
 
     /**
@@ -514,7 +559,7 @@ class Client
      */
     protected function socketWrite($data)
     {
-        $w_bytes = fwrite($this->socket, $data);
+        $w_bytes = @fwrite($this->socket, $data);
         if ($w_bytes < strlen($data)) {
             $metadata = stream_get_meta_data($this->socket);
             throw new ConnectionException(
@@ -568,7 +613,7 @@ class Client
                 }
             }
 
-            $buffer = fread($this->socket, $length - strlen($data));
+            $buffer = @fread($this->socket, $length - strlen($data));
             $metadata = stream_get_meta_data($this->socket);
 
             if ($buffer === false) {

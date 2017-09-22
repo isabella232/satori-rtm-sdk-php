@@ -68,8 +68,12 @@ class RoleAuth implements iAuth
     {
         $this->connection = $connection;
 
-        $this->logger->info('Auth: Starting authentication');
-        $this->handshake();
+        if ($this->connection->isConnectionNew()) {
+            $this->logger->info('Auth: Starting authentication');
+            $this->handshake();
+        } else {
+            $this->logger->info('Auth: Reused connection. Authentication is not needed.');
+        }
     }
 
     /**

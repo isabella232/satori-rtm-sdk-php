@@ -303,6 +303,7 @@ class RtmClient extends Observable
     const ERROR_CODE_UNKNOWN_SUBSCRIPTION = 4;
     const ERROR_CODE_NOT_CONNECTED        = 5;
     const ERROR_CODE_CLIENT_IN_USE        = 6;
+    const ERROR_CODE_PERSISTENT_SUBSCRIBE = 7;
 
     /**
      * Connection instance
@@ -356,6 +357,7 @@ class RtmClient extends Observable
      *     $options = [
      *       'auth'   => (Auth\iAuth) Any instance that implements iAuth instance
      *       'logger' => (\Psr\Log\LoggerInterface Custom logger
+     *       'persistent_connection' => bool Use persistent connection to Satori RTM.
      *     ]
      *
      * @throws ApplicationException if endpoint is empty
@@ -369,6 +371,7 @@ class RtmClient extends Observable
         $default_options = array(
             'auth' => null,
             'logger' => new Logger(),
+            'persistent_connection' => false,
         );
 
         $this->options = array_merge($default_options, $options);
@@ -663,12 +666,20 @@ class RtmClient extends Observable
      *              For more information about the **body** element of a PDU,
      *              see **RTM API** in the online docs.
      * @throws ConnectionException when connection is broken, unable to connect or send/read from the connection
+     * @throws ApplicationException when using persistent connection
      * @return void
      *
      * @example subscribe_to_channel.php Subscribe to channel
      */
     public function subscribe($subscription_id, callable $callback, $options = array())
     {
+        if ($this->options['persistent_connection']) {
+            throw new ApplicationException(
+                'It is forbidden to subscribe when using persistent connection',
+                self::ERROR_CODE_PERSISTENT_SUBSCRIBE
+            );
+        }
+
         $subscription = new Subscription($subscription_id, $callback, $options);
         $subscription->setLogger($this->logger);
         $subscription->setContext('client', $this);
@@ -853,6 +864,7 @@ class RtmClient extends Observable
                     );
                 }
             },
+            'persistent_connection' => $this->options['persistent_connection'],
         ));
     }
 

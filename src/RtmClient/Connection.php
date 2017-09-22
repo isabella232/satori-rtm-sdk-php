@@ -70,7 +70,7 @@ class Connection
         $this->on_unsolicited_pdu = isset($options['on_unsolicited_pdu']) ? $options['on_unsolicited_pdu'] : null;
 
         try {
-            $this->ws = new Ws($endpoint);
+            $this->ws = new Ws($endpoint, $options);
         } catch (\Exception $e) {
             $this->logger->error($e->getMessage());
             throw $e;
@@ -233,6 +233,17 @@ class Connection
                 break;
             }
         }
+    }
+
+    /**
+     * Checks if connection was newly created.
+     *
+     * @return boolean true if connection was newly established.
+     *                 false if it is a persistent connection that was established before.
+     */
+    public function isConnectionNew()
+    {
+        return $this->ws->isConnectionNew();
     }
 
     /**
