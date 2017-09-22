@@ -124,6 +124,26 @@ To enable testing verbose mode use:
 CREDENTIALS=/full/path/to/credentials.json composer test-verbose
 ```
 
+# Persistent connections
+
+Persistent connections are good solution to reduce execution time by using an already established connection.
+PHP does not spend additional time establishing a new connection and authorization.
+
+But this solution has a number of limitations:
+- You can not subscribe to any channel. This limitation was added in order to avoid a possible situation 
+  with an overflow of the incoming buffer after the script is finished;
+- There is a possible situation with the PDU collision. The script can do publish with ack, but do not 
+  wait for an reply from Satori RTM and finish the work.  Because the connection is not closed, the following script, which will use it, will receive ack, although it has not sent anything yet or it will publish with ack, but when reading reply it gets ack from the previous script;
+
+Usage:
+```
+$options = array(
+  'persistent_connection' => true,
+);
+$client = new RtmClient(ENDPOINT, APP_KEY, $options);
+$client->connect();
+```
+
 # Troubleshooting
 
 ## Unable to Connect to a Secure Endpoint

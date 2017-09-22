@@ -241,8 +241,10 @@ class Client
             // Receiving a close frame will close the socket
             return $this->read(self::SYNC_READ, $timeout);
         } catch (ConnectionException $e) {
-            // Broken connection
-            fclose($this->socket);
+            if ($this->is_connected && is_null($this->socket)) {
+                // Broken connection
+                fclose($this->socket);
+            }
             $this->is_connected = false;
 
             return array(ReturnCode::NOT_CONNECTED, '');
