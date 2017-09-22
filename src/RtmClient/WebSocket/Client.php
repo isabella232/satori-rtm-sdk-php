@@ -162,7 +162,7 @@ class Client
         $this->is_connection_new = !$this->options['persistent_connection'] || ftell($this->socket) === 0;
 
         $this->logger->debug('Use persistent connection? ' . var_export($this->options['persistent_connection'], true));
-        $this->logger->debug('Bytes sent ' . var_export(ftell($this->socket), true));
+        $this->logger->debug('Bytes sent ' . ftell($this->socket));
 
         if ($this->is_connection_new) {
             stream_set_timeout($this->socket, $this->options['timeout']);
