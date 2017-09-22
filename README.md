@@ -144,6 +144,10 @@ $client = new RtmClient(ENDPOINT, APP_KEY, $options);
 $client->connect();
 ```
 
+**IMPORTANT NOTICE**
+
+Persistent connections work only when PHP works in PHP-FPM or FastCGI mode.
+
 # Troubleshooting
 
 ## Unable to Connect to a Secure Endpoint
