@@ -840,6 +840,11 @@ class RtmClient extends Observable
     {
         $this->connection = new Connection($this->endpoint . '?appkey=' . $this->appkey, array(
             'logger' => $this->logger,
+            'on_unsolicited_pdu' => function ($pdu) {
+                if (strncmp($pdu->action, 'rtm/subscription', 16) === 0) {
+                    $this->processSubscriptionRequests($pdu);
+                }
+            },
         ));
     }
 
@@ -863,11 +868,7 @@ class RtmClient extends Observable
         try {
             list($code, $pdu) = $this->connection->read($mode, $timeout_sec, $timeout_microsec);
 
-            if ($code === SocketRC::READ_OK) {
-                if (isset($pdu->body['subscription_id']) && empty($pdu->id)) {
-                    $this->processSubscriptionRequests($pdu);
-                }
-            } elseif (in_array($code, array(SocketRC::READ_ERROR, SocketRC::NOT_CONNECTED))) {
+            if (in_array($code, array(SocketRC::READ_ERROR, SocketRC::NOT_CONNECTED))) {
                 $this->logger->error('Unable to read from socket. Error: ' . $code);
             } elseif ($code === SocketRC::CLOSED) {
                 throw new ConnectionException(
