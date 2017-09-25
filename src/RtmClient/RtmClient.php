@@ -841,7 +841,7 @@ class RtmClient extends Observable
         $this->connection = new Connection($this->endpoint . '?appkey=' . $this->appkey, array(
             'logger' => $this->logger,
             'on_unsolicited_pdu' => function ($pdu) {
-                if (isset($pdu->body['subscription_id']) && empty($pdu->id)) {
+                if (strncmp($pdu->action, 'rtm/subscription', 16) === 0) {
                     $this->processSubscriptionRequests($pdu);
                 }
             },
