@@ -71,6 +71,14 @@ class Client
     protected $is_closing = false;
 
     /**
+     * Frame processing flag.
+     * Uses to drop a connection in case if script died, but only a part of a frame was read or sent.
+     *
+     * @var boolean
+     */
+    protected $frame_processing_in_progress = false;
+
+    /**
      * Creates new WebSocket client.
      *
      * @param string $url Endpoint URL with schema
@@ -93,6 +101,16 @@ class Client
         $this->options = array_merge($default, $options);
         $this->url = $this->parseUrl($url);
         $this->logger = !empty($options['logger']) ? $options['logger'] : new Logger();
+
+        $state_checker = function () {
+            if ($this->options['persistent_connection'] && $this->frame_processing_in_progress) {
+                // A script read only a part of frame. The rest part of the frame cannot
+                //  be read by another script, so we need to drop the connection.
+                $this->logger->error('Connection dropped because only part of socket frame was read');
+                fclose($this->socket);
+            }
+        };
+        register_shutdown_function($state_checker);
     }
 
     /**
@@ -279,6 +297,7 @@ class Client
             );
         }
 
+        $this->frame_processing_in_progress = true;
         $payload_length = strlen($payload);
 
         $fragment_cursor = 0;
@@ -291,6 +310,7 @@ class Client
             $opcode = OpCode::CONTINUATION;
         }
 
+        $this->frame_processing_in_progress = false;
         return true;
     }
 
@@ -320,6 +340,7 @@ class Client
             );
         }
 
+        $this->frame_processing_in_progress = true;
         $this->continuous_payload = '';
         $response = null;
         $code = null;
@@ -339,6 +360,7 @@ class Client
             }
         }
 
+        $this->frame_processing_in_progress = false;
         return array($code, $response);
     }
 
