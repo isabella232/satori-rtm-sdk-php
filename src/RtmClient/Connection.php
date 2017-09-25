@@ -69,6 +69,11 @@ class Connection
         $this->logger = isset($options['logger']) ? $options['logger'] : new Logger();
         $this->on_unsolicited_pdu = isset($options['on_unsolicited_pdu']) ? $options['on_unsolicited_pdu'] : null;
 
+        if (isset($options['persistent_connection']) && $options['persistent_connection']) {
+            // Reduce the probability of PDU ids collision.
+            // $this->last_id = rand(0, PHP_INT_MAX); Cannot use this part for now
+        }
+
         try {
             $this->ws = new Ws($endpoint, $options);
         } catch (\Exception $e) {
@@ -236,14 +241,14 @@ class Connection
     }
 
     /**
-     * Checks if connection was newly created.
+     * Checks if the connection is persistent and was reused.
      *
-     * @return boolean true if connection was newly established.
-     *                 false if it is a persistent connection that was established before.
+     * @return boolean true if the connection is persistent and was reused.
+     *                 false otherwise
      */
-    public function isConnectionNew()
+    public function isReusedPersistentConnection()
     {
-        return $this->ws->isConnectionNew();
+        return $this->ws->isReusedPersistentConnection();
     }
 
     /**

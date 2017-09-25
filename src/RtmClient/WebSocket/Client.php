@@ -61,7 +61,7 @@ class Client
      *
      * @var bool
      */
-    protected $is_connection_new = true;
+    protected $is_reused_p_connection = true;
 
     /**
      * Socket state after call close()
@@ -159,12 +159,12 @@ class Client
         }
 
         // Check if connection is persistent and was reused
-        $this->is_connection_new = !$this->options['persistent_connection'] || ftell($this->socket) === 0;
+        $this->is_reused_p_connection = $this->options['persistent_connection'] && ftell($this->socket) > 0;
 
         $this->logger->debug('Use persistent connection? ' . var_export($this->options['persistent_connection'], true));
         $this->logger->debug('Bytes sent ' . ftell($this->socket));
 
-        if ($this->is_connection_new) {
+        if (!$this->is_reused_p_connection) {
             stream_set_timeout($this->socket, $this->options['timeout']);
 
             $key = self::generateSecKey();
@@ -343,14 +343,14 @@ class Client
     }
 
     /**
-     * Checks if connection was newly created.
+     * Checks if the connection is persistent and was reused.
      *
-     * @return boolean true if connection was newly established.
-     *                 false if it is a persistent connection that was established before.
+     * @return boolean true if the connection is persistent and was reused.
+     *                 false otherwise
      */
-    public function isConnectionNew()
+    public function isReusedPersistentConnection()
     {
-        return $this->is_connection_new;
+        return $this->is_reused_p_connection;
     }
 
     /**
