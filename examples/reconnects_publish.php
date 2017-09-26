@@ -34,7 +34,9 @@ $client->onConnected(function () {
     echo "Type: $type; Error: $error[message] ($error[code])" . PHP_EOL;
 });
 
-$client->connect() or die;
+if (!$client->connect()) {
+    reconnect($client);
+}
 
 $animal = array(
     'who' => 'zebra',
@@ -59,18 +61,23 @@ while (true) {
         $client->waitAllReplies($timeout);
     } catch (ConnectionException $e) {
         // Recreate a client and connect it once again
-        while (!$client->isConnected()) {
-            sleep(1); // wait 1 second before reconnect
-
-            // Create a new RtmClient using the old one.
-            // All callbacks and subscriptions will be moved to the new client.
-            $client = clone $client;
-            $client->connect();
-        }
+        reconnect($client);
     }
 
     // Update zebra coords and publish again
     $animal['where'][0] += (rand(1, 100) - 50) / 100000;
     $animal['where'][1] += (rand(1, 100) - 50) / 100000;
     sleep(1);
+}
+
+function reconnect(&$client)
+{
+    while (!$client->isConnected()) {
+        sleep(1); // wait 1 second before reconnect
+
+        // Create a new RtmClient using the old one.
+        // All callbacks will be moved to the new client.
+        $client = clone $client;
+        $client->connect();
+    }
 }
