@@ -65,14 +65,16 @@ class Connection
      */
     public function __construct($endpoint, $options = array())
     {
-        $this->endpoint = $endpoint;
-        $this->logger = isset($options['logger']) ? $options['logger'] : new Logger();
-        $this->on_unsolicited_pdu = isset($options['on_unsolicited_pdu']) ? $options['on_unsolicited_pdu'] : null;
+        $default_options = array(
+            'logger' => new Logger(),
+            'on_unsolicited_pdu' => null,
+            'connection_id' => null,
+        );
 
-        if (isset($options['persistent_connection']) && $options['persistent_connection']) {
-            // Reduce the probability of PDU ids collision.
-            // $this->last_id = rand(0, PHP_INT_MAX); Cannot use this part for now
-        }
+        $options = array_merge($default_options, $options);
+        $this->endpoint = $endpoint;
+        $this->logger = $options['logger'];
+        $this->on_unsolicited_pdu = $options['on_unsolicited_pdu'];
 
         try {
             $this->ws = new Ws($endpoint, $options);

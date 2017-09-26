@@ -96,6 +96,7 @@ class Client
             'timeout' => Client::DEFAULT_TIMEOUT_SEC,
             'fragment_size' => Client::DEFAULT_FRAGMENT_SIZE,
             'persistent_connection' => false,
+            'connection_id' => null,
         );
 
         $this->options = array_merge($default, $options);
@@ -138,6 +139,10 @@ class Client
     public function connect()
     {
         $endpoint = $this->url['socket_scheme'] . '://' . $this->url['host'] . ':' . $this->url['port'];
+        if (!empty($this->options['connection_id'])) {
+            $endpoint .= '/' . $this->options['connection_id'];
+        }
+
         $context = stream_context_create();
 
         if (getenv('SSL_CA_FILE') !== false || getenv('SSL_CA_PATH') !== false || getenv('SSL_VERIFY_PEER') !== false) {

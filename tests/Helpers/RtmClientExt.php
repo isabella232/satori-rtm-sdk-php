@@ -6,9 +6,9 @@ use RtmClient\RtmClient;
 
 class RtmClientExt extends RtmClient
 {
-    public function getEndpoint()
+    public function getConnectionUrl()
     {
-        return $this->endpoint;
+        return $this->connection_url;
     }
 
     public function getConnection()
