@@ -164,5 +164,6 @@ class RtmClientRealConnectionTest extends RtmClientBaseTestCase
         $client->sockReadSync(1);
 
         $this->assertEquals(1, $events);
+        $this->assertEquals(false, $client->isConnected());
     }
 }
