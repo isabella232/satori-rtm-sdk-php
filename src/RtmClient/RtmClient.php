@@ -470,17 +470,20 @@ class RtmClient extends Observable
     /**
      * Closes connection.
      *
+     * @param integer $status Close status code.
+     * @param string $reason Any message that will be send in close frame.
+     *
      * @return void
      */
-    public function close()
+    public function close($status = 1000, $reason = 'Connection closed')
     {
-        if ($this->connection->close()) {
+        if ($this->connection->close($status, $reason)) {
             $this->logger->info('Client: disconnected');
 
             $this->is_connected = false;
             $this->disconnectAllSubscriptions();
 
-            $this->fire(RtmEvents::DISCONNECTED, 1000, null);
+            $this->fire(RtmEvents::DISCONNECTED, $status, $reason);
         }
     }
 
@@ -843,6 +846,12 @@ class RtmClient extends Observable
             'on_unsolicited_pdu' => function ($pdu) {
                 if (strncmp($pdu->action, 'rtm/subscription', 16) === 0) {
                     $this->processSubscriptionRequests($pdu);
+                } elseif ($pdu->action == '/error') {
+                    $status = 1008;
+                    $reason = 'Unclassified RTM error is received: ' . $pdu->body['error'] . ' - ' . $pdu->body['reason'];
+                    $this->logger->error($reason);
+
+                    $this->close($status, $reason);
                 }
             },
         ));

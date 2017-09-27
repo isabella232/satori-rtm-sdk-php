@@ -10,4 +10,9 @@ class ConnectionExt extends Connection
     {
         return $this->ws;
     }
+
+    public function setWs($ws)
+    {
+        $this->ws = $ws;
+    }
 }

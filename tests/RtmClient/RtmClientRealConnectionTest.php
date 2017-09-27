@@ -4,6 +4,7 @@ namespace Tests\RtmClient;
 
 use Tests\RtmClientBaseTestCase;
 use Tests\Helpers\ConnectionExt;
+use Tests\Helpers\WsClientExt;
 
 use RtmClient\RtmClient;
 use RtmClient\Auth\RoleAuth;
@@ -134,5 +135,34 @@ class RtmClientRealConnectionTest extends RtmClientBaseTestCase
         }
 
         $this->assertEquals($events, 2);
+    }
+
+    public function testUnsolicitedErrorPdu()
+    {
+        $events = 0;
+        $client = $this->establishConnection();
+        $client->onDisconnected(function ($code, $reason) use (&$events) {
+            $this->assertEquals(1008, $code);
+            $events++;
+        });
+        $client->OnError(function ($type, $err) use (&$events) {
+            $this->fail('It is not an error');
+        });
+
+        $endpoint = $this->credentials['endpoint'] . 'v2?appkey=' . $this->credentials['appkey'];
+        $client_connection = $client->getConnection();
+        $connection = new ConnectionExt($endpoint, array(
+            'on_unsolicited_pdu' => $client_connection->on_unsolicited_pdu,
+        ));
+        $connection->connect();
+        $ws = new WsClientExt($endpoint);
+        $ws->connect();
+        $connection->setWs($ws);
+        $client->setConnection($connection);
+
+        $ws->putIncomingData('{"action": "/error", "body": {"error": "some_error", "reason": "some_reason"}}');
+        $client->sockReadSync(1);
+
+        $this->assertEquals(1, $events);
     }
 }

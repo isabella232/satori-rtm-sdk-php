@@ -192,7 +192,7 @@ class Client
      * Sends "close" frame.
      *
      * @param integer $status Close status code
-     * @param string $message Any message that will be send in close frame
+     * @param string $reason Any message that will be send in close frame
      * @param int $timeout Wait for response timeout
      * @return array read code and socket frame payload
      *
@@ -201,14 +201,14 @@ class Client
      *       '1' => (string) Close frame payload
      *     ]
      */
-    public function close($status = 1000, $message = null, $timeout = self::DEFAULT_TIMEOUT_SEC)
+    public function close($status = 1000, $reason = null, $timeout = self::DEFAULT_TIMEOUT_SEC)
     {
         $status_binstr = sprintf('%016b', $status);
         $status_str = '';
         foreach (str_split($status_binstr, 8) as $binstr) {
             $status_str .= chr(bindec($binstr));
         }
-        $this->send($status_str . $message, true, OpCode::CLOSE);
+        $this->send($status_str . $reason, true, OpCode::CLOSE);
         $this->is_closing = true;
 
         // Receiving a close frame will close the socket
