@@ -989,6 +989,10 @@ class RtmClient extends Observable
     /**
      * Shorthand for on(RtmEvents::CONNECTED).
      *
+     * Called when connection has been established and authentication (optional) is completed.
+     * If connection type is persistent the event will be called after getting previously
+     * established connection.
+     *
      * callback function params:
      *  - none
      *
