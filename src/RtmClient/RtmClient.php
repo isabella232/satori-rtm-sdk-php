@@ -406,6 +406,9 @@ class RtmClient extends Observable
         // We need to cleanup several properties from previous client
         $this->is_connected = $this->once_connected = false;
         $this->initConnection();
+
+        // Cleanup current subscriptions
+        $this->subscriptions = array();
     }
 
     /**
