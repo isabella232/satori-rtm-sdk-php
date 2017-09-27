@@ -263,13 +263,7 @@ class RtmClientSubscriptionRealTest extends RtmClientBaseTestCase
         $client->sockReadSync(1);
         $client2->sockReadSync(1);
 
-        $this->assertEquals(2, $messages);
-
-        $client->close();
-        $client2->publish($channel, 'message');
-        $client2->sockReadSync(1);
-
-        $this->assertEquals($messages, 3);
+        $this->assertEquals(1, $messages);
     }
 
     public function testWaitAllRepliesForData()

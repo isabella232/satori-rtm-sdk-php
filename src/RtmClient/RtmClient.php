@@ -269,9 +269,11 @@ use RtmClient\Subscription\Subscription;
  * $new_client->connect();
  * ```
  *
- * All your callbacks and subscriptions will be moved to the new client. After calling `connect`
- * client tries to restore your previous subscriptions using last know **position** for these
- * subscriptions. See *reconnects* examples.
+ * All your callbacks will be moved to the new client. After calling `connect`
+ * client will establish a new connection to Satori RTM.
+ * Note that you need to restore your subscriptions manually.
+ *
+ * See *reconnects* examples.
  *
  * @example authenticate.php Authentication example
  * @example changing_subscription.php Change filter of existing subscription.
@@ -407,11 +409,8 @@ class RtmClient extends Observable
         $this->is_connected = $this->once_connected = false;
         $this->initConnection();
 
-        $subscriptions = array();
-        foreach ($this->subscriptions as $subscription_id => $subscription) {
-            $subscriptions[$subscription_id] = clone $subscription;
-        }
-        $this->subscriptions = $subscriptions;
+        // Cleanup current subscriptions
+        $this->subscriptions = array();
     }
 
     /**
