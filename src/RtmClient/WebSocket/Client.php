@@ -345,7 +345,6 @@ class Client
             );
         }
 
-        $this->frame_processing_in_progress = true;
         $this->continuous_payload = '';
         $response = null;
         $code = null;
@@ -365,7 +364,6 @@ class Client
             }
         }
 
-        $this->frame_processing_in_progress = false;
         return array($code, $response);
     }
 
@@ -401,10 +399,13 @@ class Client
         // Set timeout till first data
         stream_set_timeout($this->socket, $timeout_sec, $timeout_microsec);
 
+        $this->frame_processing_in_progress = true;
+
         // Read first 2 bytes of frame header
         $data = $this->socketRead(2, $mode);
 
         if (empty($data)) {
+            $this->frame_processing_in_progress = false;
             return array(RC::READ_WOULD_BLOCK, null);
         }
 
@@ -461,6 +462,8 @@ class Client
                 $payload = $data;
             }
         }
+
+        $this->frame_processing_in_progress = false;
 
         if ($opcode === OpCode::PONG) {
             return array(RC::PONG, $payload);
