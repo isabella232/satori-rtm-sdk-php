@@ -15,36 +15,63 @@ const APP_KEY = 'YOUR_APPKEY';
 const ROLE = 'YOUR_ROLE';
 const ROLE_SECRET_KEY = 'YOUR_SECRET';
 
-function run_client(&$state)
-{
-    $options = array();
+$options = array();
 
-    if (ROLE_SECRET_KEY != 'YOUR_SECRET') {
-        $options['auth'] = new RoleAuth(ROLE, ROLE_SECRET_KEY);
+if (ROLE_SECRET_KEY != 'YOUR_SECRET') {
+    $options['auth'] = new RoleAuth(ROLE, ROLE_SECRET_KEY);
+}
+
+echo 'RTM client config:' . PHP_EOL;
+echo '	endpoint = ' . ENDPOINT . PHP_EOL;
+echo '	appkey = ' . APP_KEY . PHP_EOL;
+echo '	authenticate? = ' . json_encode(!empty($options['auth'])) . PHP_EOL;
+if (!empty($options['auth'])) {
+    echo '		(as ' . ROLE . ')' . PHP_EOL;
+}
+
+$client = new RtmClient(ENDPOINT, APP_KEY, $options);
+$client->onConnected(function () {
+    echo 'Connected to Satori RTM and authenticated as ' . ROLE . PHP_EOL;
+})->onError(function ($type, $error) use (&$state, &$client) {
+    echo "Type: $type; Error: $error[message] ($error[code])" . PHP_EOL;
+});
+
+$state = array();
+
+if (!$client->connect()) {
+    reconnect($client);
+}
+
+// We will read all incoming messages and publish data from time to time
+while (true) {
+    try {
+        subscribe($client, $state);
+
+        // Publish loop
+        while (true) {
+            $animal = array(
+                'who' => 'zebra',
+                'where' => array(
+                    'lat' => 34.134358 + rand(0, 100)/10000,
+                    'lon' => -118.321506 + rand(0, 100)/10000,
+                ),
+            );
+
+            $client->publish("animals", $animal, function ($code, $response) use ($animal) {
+                if ($code == RtmClient::CODE_OK) {
+                    echo 'Animal is published ' . json_encode($animal) . PHP_EOL;
+                } else {
+                    echo 'Publish request failed. ';
+                    echo 'Error: ' . $response['error'] . '; Reason: ' . $response['reason'] . PHP_EOL;
+                }
+            });
+
+            $client->sockReadFor(2);
+        }
+    } catch (ConnectionException $e) {
+        echo 'OK, we will reconnect now' . PHP_EOL;
+        reconnect($client);
     }
-
-    echo 'RTM client config:' . PHP_EOL;
-    echo '	endpoint = ' . ENDPOINT . PHP_EOL;
-    echo '	appkey = ' . APP_KEY . PHP_EOL;
-    echo '	authenticate? = ' . json_encode(!empty($options['auth'])) . PHP_EOL;
-    if (!empty($options['auth'])) {
-        echo '		(as ' . ROLE . ')' . PHP_EOL;
-    }
-
-    $client = new RtmClient(ENDPOINT, APP_KEY, $options);
-    $client->onConnected(function () {
-        echo 'Connected to Satori RTM and authenticated as ' . ROLE . PHP_EOL;
-    })->onError(function ($type, $error) use (&$state, &$client) {
-        echo "Type: $type; Error: $error[message] ($error[code])" . PHP_EOL;
-    });
-
-    if (!$client->connect()) {
-        sleep(1);
-        return run_client($state);
-    }
-
-    subscribe($client, $state);
-    return $client;
 }
 
 function subscribe($client, &$state)
@@ -88,36 +115,14 @@ function subscribe($client, &$state)
     $client->subscribe('animals', $callback, $options);
 }
 
-$state = array();
+function reconnect(&$client)
+{
+    while (!$client->isConnected()) {
+        sleep(1); // wait 1 second before reconnect
 
-// We will read all incoming messages and publish data from time to time
-while (true) {
-    try {
-        $client = run_client($state);
-
-        // Publish loop
-        while (true) {
-            $animal = array(
-                'who' => 'zebra',
-                'where' => array(
-                    'lat' => 34.134358 + rand(0, 100)/10000,
-                    'lon' => -118.321506 + rand(0, 100)/10000,
-                ),
-            );
-
-            $client->publish("animals", $animal, function ($code, $response) use ($animal) {
-                if ($code == RtmClient::CODE_OK) {
-                    echo 'Animal is published ' . json_encode($animal) . PHP_EOL;
-                } else {
-                    echo 'Publish request failed. ';
-                    echo 'Error: ' . $response['error'] . '; Reason: ' . $response['reason'] . PHP_EOL;
-                }
-            });
-
-            $client->sockReadFor(2);
-        }
-    } catch (ConnectionException $e) {
-        echo 'OK, we will reconnect after 1 sec';
-        sleep(1);
+        // Create a new RtmClient using the old one.
+        // All callbacks will be moved to the new client.
+        $client = clone $client;
+        $client->connect();
     }
 }
