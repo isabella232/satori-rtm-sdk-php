@@ -146,7 +146,9 @@ class RtmClientRealConnectionTest extends RtmClientBaseTestCase
             $events++;
         });
         $client->OnError(function ($type, $err) use (&$events) {
-            $this->fail('It is not an error');
+            $this->assertEquals(RtmClient::ERROR_TYPE_CONNECTION, $type);
+            $this->assertEquals(1008, $err['code']);
+            $events++;
         });
 
         $endpoint = $this->credentials['endpoint'] . 'v2?appkey=' . $this->credentials['appkey'];
@@ -161,9 +163,12 @@ class RtmClientRealConnectionTest extends RtmClientBaseTestCase
         $client->setConnection($connection);
 
         $ws->putIncomingData('{"action": "/error", "body": {"error": "some_error", "reason": "some_reason"}}');
-        $client->sockReadSync(1);
+        try {
+            $client->sockReadSync(1);
+        } catch (ConnectionException $e) {
+        }
 
-        $this->assertEquals(1, $events);
+        $this->assertEquals(2, $events);
         $this->assertEquals(false, $client->isConnected());
     }
 }

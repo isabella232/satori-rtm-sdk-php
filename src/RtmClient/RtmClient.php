@@ -849,9 +849,9 @@ class RtmClient extends Observable
                 } elseif ($pdu->action == '/error') {
                     $status = 1008;
                     $reason = 'Unclassified RTM error is received: ' . $pdu->body['error'] . ' - ' . $pdu->body['reason'];
-                    $this->logger->error($reason);
-
-                    $this->close($status, $reason);
+                    throw new ConnectionException(
+                        $reason, $status
+                    );
                 }
             },
         ));
