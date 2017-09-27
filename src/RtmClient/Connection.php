@@ -182,7 +182,7 @@ class Connection
      */
     public function close($status = 1000, $reason = 'Connection closed')
     {
-        $this->closeCallbacks($status, $reason);
+        $this->closeCallbacks($reason);
         return $this->ws->close();
     }
 
