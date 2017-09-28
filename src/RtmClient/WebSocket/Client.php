@@ -104,27 +104,23 @@ class Client
         $this->logger = !empty($options['logger']) ? $options['logger'] : new Logger();
 
         $state_checker = function () {
-            if ($this->options['persistent_connection'] && $this->frame_processing_in_progress) {
-                // A script read only a part of frame. The rest part of the frame cannot
-                //  be read by another script, so we need to drop the connection.
-                $this->logger->error('Connection dropped because only part of socket frame was read');
-                fclose($this->socket);
+            if ($this->socket) {
+                if ($this->options['persistent_connection'] && $this->frame_processing_in_progress) {
+                    // A script read only a part of frame. The rest part of the frame cannot
+                    // be read by another script using this persistent conenction,
+                    // so we need to drop the connection.
+                    $this->logger->error('Connection dropped because only part of socket frame was read');
+                    fclose($this->socket);
+                }
             }
-        };
-        register_shutdown_function($state_checker);
-    }
 
-    /**
-     * Closes socket connection and frees resources.
-     */
-    public function __destruct()
-    {
-        if ($this->socket) {
-            if (get_resource_type($this->socket) === 'stream') {
-                fclose($this->socket);
-            }
-            $this->socket = null;
-        }
+            // Since register_shutdown_function adds a global reference to the WebSocket client
+            // We cannot use __desctruct to release resources on demand. Also we do not close a socket
+            // connection using fclose for non-persistent connections. PHP will do it by themselves
+            // regardless of whether you call the fclose or not.
+        };
+
+        register_shutdown_function($state_checker);
     }
 
     /**
