@@ -635,7 +635,10 @@ class Client
                 );
             }
 
-            if ($mode == self::ASYNC_READ) {
+            // Since fread returns up to N bytes, we should guarantee that we read requested
+            // lenght. WS Client does not have incoming buffer for now to process frame later,
+            // so we can use ASYNC_READ mode only to determine if we can start reading or not.
+            if ($mode == self::ASYNC_READ && empty($data)) {
                 if (!$this->streamIsReadyToRead()) {
                     return '';
                 }
