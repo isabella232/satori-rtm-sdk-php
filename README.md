@@ -150,7 +150,8 @@ $client->connect();
 
 **IMPORTANT NOTICE**
 
-Persistent connections work only when PHP works in PHP-FPM or FastCGI mode.
+Persistent connections work only in the environments that support persistent connections,
+like PHP-FPM mode, FastCGI mode, Apache mod_php, etc.
 
 # Troubleshooting
 
