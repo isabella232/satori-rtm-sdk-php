@@ -176,13 +176,14 @@ class Connection
     /**
      * Closes connection.
      *
-     * @param string $reason Close reason. All unprocessed callbacks will get this reason.
+     * @param integer $status Close status code
+     * @param string $reason Any message that will be send in close frame. All unprocessed callbacks will get this reason.
      * @return true if websocket connection has been closed
      */
-    public function close($reason = 'Connection closed')
+    public function close($status = 1000, $reason = 'Connection closed')
     {
         $this->closeCallbacks($reason);
-        return $this->ws->close();
+        return $this->ws->close($status, $reason);
     }
 
     /**
