@@ -45,16 +45,16 @@ class RtmClientBaseTest extends RtmClientBaseTestCase
     public function testVersionedEndpoint()
     {
         $client = new RtmClientExt('ws://wrong-host-name.www', '123456789');
-        $this->assertEquals($client->getEndpoint(), 'ws://wrong-host-name.www/v2');
+        $this->assertEquals($client->getConnectionUrl(), 'ws://wrong-host-name.www/v2?appkey=123456789');
 
         $client = new RtmClientExt('ws://wrong-host-name.www/', '123456789');
-        $this->assertEquals($client->getEndpoint(), 'ws://wrong-host-name.www/v2');
+        $this->assertEquals($client->getConnectionUrl(), 'ws://wrong-host-name.www/v2?appkey=123456789');
 
         $client = new RtmClientExt('wss://wrong-host-name.www/v2', '123456789');
-        $this->assertEquals($client->getEndpoint(), 'wss://wrong-host-name.www/v2');
+        $this->assertEquals($client->getConnectionUrl(), 'wss://wrong-host-name.www/v2?appkey=123456789');
 
         $client = new RtmClientExt('wss://wrong-host-name.www/v3', '123456789');
-        $this->assertEquals($client->getEndpoint(), 'wss://wrong-host-name.www/v3');
+        $this->assertEquals($client->getConnectionUrl(), 'wss://wrong-host-name.www/v3?appkey=123456789');
     }
 
     public function testIAuthInterface()

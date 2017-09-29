@@ -303,6 +303,7 @@ class RtmClient extends Observable
     const ERROR_CODE_UNKNOWN_SUBSCRIPTION = 4;
     const ERROR_CODE_NOT_CONNECTED        = 5;
     const ERROR_CODE_CLIENT_IN_USE        = 6;
+    const ERROR_CODE_PERSISTENT_SUBSCRIBE = 7;
 
     /**
      * Connection instance
@@ -369,12 +370,8 @@ class RtmClient extends Observable
         $default_options = array(
             'auth' => null,
             'logger' => new Logger(),
+            'connection_id' => null,
         );
-
-        $this->options = array_merge($default_options, $options);
-
-        // Set logger
-        $this->logger = $this->options['logger'];
 
         if (strlen($endpoint) == 0) {
             throw new ApplicationException(
@@ -388,26 +385,74 @@ class RtmClient extends Observable
             );
         }
 
+        $this->options = array_merge($default_options, $options);
+
+        // Set logger
+        $this->logger = $this->options['logger'];
+
         $this->auth = $this->options['auth'];
-        $this->endpoint = $this->appendVersion($endpoint);
-        $this->appkey = $appkey;
+        $this->connection_url = $this->buildConnectionUrl($endpoint, $appkey);
+        $this->connection_id = $this->options['connection_id'];
         if (!is_null($this->auth) && !$this->auth instanceof Auth\iAuth) {
             throw new ApplicationException(
                 'Auth must implement iAuth interface', self::ERROR_CODE_NOT_AUTH_INTERFACE
             );
         }
+        $this->persistent_connection = false;
+    }
 
-        $this->initConnection();
+    /**
+     * Creates a new RtmClient instance with persistent connection or returns previously created instance.
+     * Endpoint, appkey and optional connection_id is a key to check if instance has been previously created.
+     *
+     * Singleton.
+     *
+     * @param string $endpoint Endpoint for RTM. Available from the Dev Portal
+     * @param string $appkey Appkey used to access RTM. Available from the Dev Portal
+     * @param array $options Additional parameters for the RTM client instance
+     *
+     *     $options = [
+     *       'auth'   => (Auth\iAuth) Any instance that implements iAuth instance
+     *       'logger' => (\Psr\Log\LoggerInterface Custom logger
+     *       'connection_id'   => string Provides ability to create different connections to the same endpoint
+     *     ]
+     *
+     * Usage:
+     * ```
+     *      $client = RtmClient::persistentConnection('wss://endpoint.satori.com', 'appkey1234', array(
+     *          'connection_id' => 'connection1', // optional
+     *      ));
+     * ```
+     *
+     * @throws ApplicationException if endpoint is empty
+     * @throws ApplicationException if appkey is empty
+     * @throws ApplicationException if Auth does not implement iAuth interface
+     * @throws ApplicationException if wrong arguments count passed
+     * @throws BadSchemeException if endpoint has bad schema
+     */
+    public static function persistentConnection($endpoint, $appkey, $options = array())
+    {
+        static $instances = array();
+
+        $connection_id = isset($options['connection_id']) ? $options['connection_id'] : '';
+        $hash = self::buildConnectionUrl($endpoint, $appkey) . '#' . $connection_id;
+
+        if (!isset($instances[$hash])) {
+            $instances[$hash] = new RtmClient($endpoint, $appkey, $options);
+            $instances[$hash]->persistent_connection = true;
+        }
+
+        return $instances[$hash];
     }
 
     /**
      * Creates new RtmClient instance using heritable client.
+     * Uses previously added client callbacks and subscriptions.
      */
     public function __clone()
     {
         // We need to cleanup several properties from previous client
         $this->is_connected = $this->once_connected = false;
-        $this->initConnection();
 
         // Cleanup current subscriptions
         $this->subscriptions = array();
@@ -424,12 +469,32 @@ class RtmClient extends Observable
      */
     public function connect()
     {
-        if ($this->once_connected) {
+        $allow_reconnects = $this->persistent_connection || !$this->once_connected;
+        if (!$allow_reconnects) {
             throw new ApplicationException(
                 'Client is in use', self::ERROR_CODE_CLIENT_IN_USE
             );
         }
-        $this->logger->info('Client: Connecting to endpoint: ' . $this->endpoint);
+
+        $this->connection = new Connection($this->connection_url, array(
+            'logger' => $this->logger,
+            'on_unsolicited_pdu' => function ($pdu) {
+                if (strncmp($pdu->action, 'rtm/subscription', 16) === 0) {
+                    $this->processSubscriptionRequests($pdu);
+                } elseif ($pdu->action == '/error') {
+                    $status = 1008;
+                    $reason = 'Unclassified RTM error is received: ' . $pdu->body['error'] . ' - ' . $pdu->body['reason'];
+                    throw new ConnectionException(
+                        $reason, $status
+                    );
+                }
+            },
+            'persistent_connection' => $this->persistent_connection,
+            'connection_id' => $this->connection_id,
+        ));
+
+        $this->logger->info('Client: Connecting to endpoint');
+        $this->logger->debug('  ' . $this->connection_url);
 
         try {
             $this->connection->connect();
@@ -663,12 +728,20 @@ class RtmClient extends Observable
      *              For more information about the **body** element of a PDU,
      *              see **RTM API** in the online docs.
      * @throws ConnectionException when connection is broken, unable to connect or send/read from the connection
+     * @throws ApplicationException when using persistent connection
      * @return void
      *
      * @example subscribe_to_channel.php Subscribe to channel
      */
     public function subscribe($subscription_id, callable $callback, $options = array())
     {
+        if ($this->persistent_connection) {
+            throw new ApplicationException(
+                'It is forbidden to subscribe when using persistent connection',
+                self::ERROR_CODE_PERSISTENT_SUBSCRIBE
+            );
+        }
+
         $subscription = new Subscription($subscription_id, $callback, $options);
         $subscription->setLogger($this->logger);
         $subscription->setContext('client', $this);
@@ -834,26 +907,23 @@ class RtmClient extends Observable
     }
 
     /**
-     * Initializes connection property for client.
+     * Constructs connection URL using endpoint, appkey and optional hash.
      *
-     * @throws BadSchemeException if client endpoint has bad schema
+     * @param string $endpoint Server URL with schema
+     * @param string $appkey Application key
+     * @param string $hash URL hash. Uses for persistent connections
+     * @return string
      */
-    protected function initConnection()
+    protected static function buildConnectionUrl($endpoint, $appkey, $hash = '')
     {
-        $this->connection = new Connection($this->endpoint . '?appkey=' . $this->appkey, array(
-            'logger' => $this->logger,
-            'on_unsolicited_pdu' => function ($pdu) {
-                if (strncmp($pdu->action, 'rtm/subscription', 16) === 0) {
-                    $this->processSubscriptionRequests($pdu);
-                } elseif ($pdu->action == '/error') {
-                    $status = 1008;
-                    $reason = 'Unclassified RTM error is received: ' . $pdu->body['error'] . ' - ' . $pdu->body['reason'];
-                    throw new ConnectionException(
-                        $reason, $status
-                    );
-                }
-            },
-        ));
+        $endpoint = self::appendVersion($endpoint);
+        $url = $endpoint . '?appkey=' . $appkey;
+
+        if (!empty($hash)) {
+            $url .= '#' . $hash;
+        }
+
+        return $url;
     }
 
     /**
@@ -918,6 +988,10 @@ class RtmClient extends Observable
 
     /**
      * Shorthand for on(RtmEvents::CONNECTED).
+     *
+     * Called when connection has been established and authentication (optional) is completed.
+     * If connection type is persistent the event will be called after getting previously
+     * established connection.
      *
      * callback function params:
      *  - none
@@ -1139,12 +1213,9 @@ class RtmClient extends Observable
      * @param string $endpoint Custom endpoint.
      * @return string Endpoint with added RTM_VER.
      */
-    protected function appendVersion($endpoint)
+    protected static function appendVersion($endpoint)
     {
         if (preg_match('#v(?:\d+)$#', $endpoint, $matches)) {
-            $this->logger->warning('Client: Specifying RTM endpoint with protocol version is deprecated.');
-            $this->logger->warning('Client: Please remove version "' . $matches[0] . '" from endpoint: "' . $endpoint . '"');
-
             return $endpoint;
         }
 

@@ -38,6 +38,13 @@ class RoleAuth implements iAuth
     protected $connection;
 
     /**
+     * Uses to determine if auth still in progress.
+     *
+     * @var boolean
+     */
+    protected $auth_in_progress = false;
+
+    /**
      * Creates Role based authenticator.
      *
      * @param string $role Role name
@@ -54,6 +61,15 @@ class RoleAuth implements iAuth
         $this->role_secret = $role_secret;
 
         $this->logger = !empty($options['logger']) ? $options['logger'] : new Logger();
+
+        $check_auth_state = function () {
+            if ($this->auth_in_progress) {
+                // Auth still in progress but script died. Drop the connection.
+                $this->logger->error('Connection dropped because auth still in progess, but script died');
+                $this->connection->close('Auth still in progress');
+            }
+        };
+        register_shutdown_function($check_auth_state);
     }
 
     /**
@@ -66,10 +82,22 @@ class RoleAuth implements iAuth
      */
     public function authenticate(Connection $connection)
     {
+        $this->auth_in_progress = true;
         $this->connection = $connection;
 
-        $this->logger->info('Auth: Starting authentication');
-        $this->handshake();
+        if (!$this->connection->isReusedPersistentConnection()) {
+            $this->logger->info('Auth: Starting authentication');
+            try {
+                $this->handshake();
+            } catch (AuthenticationException $e) {
+                $this->auth_in_progress = false;
+                throw $e;
+            }
+        } else {
+            $this->logger->info('Auth: Reused connection. Authentication is not needed.');
+        }
+
+        $this->auth_in_progress = false;
     }
 
     /**

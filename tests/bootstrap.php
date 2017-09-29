@@ -3,7 +3,15 @@
 $base_dir = __DIR__;
 error_reporting(E_ALL);
 
-require_once($base_dir . DIRECTORY_SEPARATOR . 'BaseTestCase.php');
-require_once($base_dir . DIRECTORY_SEPARATOR . 'Helpers/ConnectionExt.php');
-require_once($base_dir . DIRECTORY_SEPARATOR . 'Helpers/RtmClientExt.php');
-require_once($base_dir . DIRECTORY_SEPARATOR . 'Helpers/WsClientExt.php');
+$classes = array(
+    'BaseTestCase.php',
+    'Helpers/ConnectionExt.php',
+    'Helpers/RtmClientExt.php',
+    'Helpers/RoleAuthExt.php',
+    'Helpers/StorageLogger.php',
+    'Helpers/WsClientExt.php',
+);
+
+foreach ($classes as $class) {
+    require_once($base_dir . DIRECTORY_SEPARATOR . $class);
+}

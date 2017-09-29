@@ -65,12 +65,19 @@ class Connection
      */
     public function __construct($endpoint, $options = array())
     {
+        $default_options = array(
+            'logger' => new Logger(),
+            'on_unsolicited_pdu' => null,
+            'connection_id' => null,
+        );
+
+        $options = array_merge($default_options, $options);
         $this->endpoint = $endpoint;
-        $this->logger = isset($options['logger']) ? $options['logger'] : new Logger();
-        $this->on_unsolicited_pdu = isset($options['on_unsolicited_pdu']) ? $options['on_unsolicited_pdu'] : null;
+        $this->logger = $options['logger'];
+        $this->on_unsolicited_pdu = $options['on_unsolicited_pdu'];
 
         try {
-            $this->ws = new Ws($endpoint);
+            $this->ws = new Ws($endpoint, $options);
         } catch (\Exception $e) {
             $this->logger->error($e->getMessage());
             throw $e;
@@ -233,6 +240,17 @@ class Connection
                 break;
             }
         }
+    }
+
+    /**
+     * Checks if the connection is persistent and was reused.
+     *
+     * @return boolean true if the connection is persistent and was reused.
+     *                 false otherwise
+     */
+    public function isReusedPersistentConnection()
+    {
+        return $this->ws->isReusedPersistentConnection();
     }
 
     /**
