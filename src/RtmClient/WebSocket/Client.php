@@ -670,10 +670,6 @@ class Client
                     throw new TimeoutException(
                         'Timeout', 20
                     );
-                } elseif ($metadata['unread_bytes'] == 0 && $mode == self::SYNC_READ) {
-                    // Socket is in non-blocking mode.
-                    // Wait for data in socket buffer.
-                    continue;
                 } else {
                     throw new ConnectionException(
                         'Unable to read from stream: ' . json_encode($metadata), 1011
