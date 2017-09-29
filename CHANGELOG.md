@@ -1,11 +1,13 @@
 v0.x.x (2017-??-??)
 ------------------------
-* Add ability to create Rtm client using the previous one.
+* Add ability to create Rtm client using the previous one;
 * Change context variable that passes to the Subscription callback **[no-backward-compatibility]**:  
     Before it was a Subscription instance  
     Now it is an associative array with the following keys:
     - subscription
     - client
+* Add ability to use Persistent connections;
+* Process unsolocited /error PDUs.
 
 v0.0.2 (2017-08-31)
 ------------------------
