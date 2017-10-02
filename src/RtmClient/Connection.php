@@ -99,6 +99,9 @@ class Connection
             throw $e;
         }
 
+        if ($this->isReusedPersistentConnection()) {
+            $this->last_id = rand(0, PHP_INT_MAX);
+        }
         return true;
     }
  
@@ -264,7 +267,7 @@ class Connection
             $this->last_id = 0;
         }
 
-        return ++$this->last_id;
+        return (string)++$this->last_id;
     }
 
     /**
