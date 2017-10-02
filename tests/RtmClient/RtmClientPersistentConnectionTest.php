@@ -75,13 +75,13 @@ class RtmClientPersistentConnectionTest extends RtmClientBaseTestCase
         if (!$client->connect()) {
             $this->fail('Unable to connect');
         }
-        //$auth->setAuthInProgress(true);
+        $auth->setAuthInProgress(true);
 
-        // register_shutdown_function(function () use ($logger) {
-        //     $last_log = array_pop($logger->storage);
-        //     $this->assertEquals('error', $last_log['type']);
-        //     $this->assertEquals('Connection dropped because auth still in progess, but script died', $last_log['message']);
-        // });
+        register_shutdown_function(function () use ($logger) {
+            $last_log = array_pop($logger->storage);
+            $this->assertEquals('error', $last_log['type']);
+            $this->assertEquals('Connection dropped because auth still in progess, but script died', $last_log['message']);
+        });
         $client->close();
     }
 
