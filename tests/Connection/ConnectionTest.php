@@ -151,6 +151,7 @@ class ConnectionTest extends RtmClientBaseTestCase
         });
         $connection->waitAllReplies();
         $this->assertTrue($event);
+        $connection->close();
     }
 
     protected function connectionInstance()
