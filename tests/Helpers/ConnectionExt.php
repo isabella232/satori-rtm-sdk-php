@@ -15,4 +15,9 @@ class ConnectionExt extends Connection
     {
         $this->ws = $ws;
     }
+
+    public function getLastId()
+    {
+        return $this->last_id;
+    }
 }

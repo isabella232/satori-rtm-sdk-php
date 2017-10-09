@@ -61,7 +61,7 @@ class Client
      *
      * @var bool
      */
-    protected $is_reused_p_connection = true;
+    protected $is_reused_p_connection = false;
 
     /**
      * Socket state after call close()

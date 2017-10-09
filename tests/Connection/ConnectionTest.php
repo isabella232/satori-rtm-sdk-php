@@ -3,6 +3,7 @@
 namespace Tests\Connection;
 
 use Tests\RtmClientBaseTestCase;
+use Tests\Helpers\ConnectionExt;
 use RtmClient\Connection;
 use RtmClient\WebSocket\Client as Ws;
 use RtmClient\WebSocket\Exceptions\BadSchemeException;
@@ -113,6 +114,44 @@ class ConnectionTest extends RtmClientBaseTestCase
         }
 
         $this->assertEquals($called, 1);
+    }
+
+    public function testRandomId()
+    {
+        $this->checkCredentials();
+
+        $endpoint = $this->credentials['endpoint'] . 'v2?appkey=' . $this->credentials['appkey'];
+        $connection = new ConnectionExt($endpoint, array(
+            'persistent_connection' => true,
+        ));
+        try {
+            $this->assertTrue($connection->connect());
+        } catch (Exception $e) {
+            $this->fail('Unable to connect to ' . $endpoint);
+        }
+
+        $id = $connection->getLastId();
+
+        $connection = new ConnectionExt($endpoint, array(
+            'persistent_connection' => true,
+        ));
+        try {
+            $this->assertTrue($connection->connect());
+        } catch (Exception $e) {
+            $this->fail('Unable to connect to ' . $endpoint);
+        }
+        $id2 = $connection->getLastId();
+
+        $this->assertNotEquals($id, $id2);
+
+        // Check if can get a response with such id
+        $event = false;
+        $connection->send("rtm/publish", array('channel' => 'test', 'message' => 123), function () use (&$event) {
+            $event = true;
+        });
+        $connection->waitAllReplies();
+        $this->assertTrue($event);
+        $connection->close();
     }
 
     protected function connectionInstance()
