@@ -120,12 +120,18 @@
             <i class="icon-custom icon-method"></i> Methods
             <ul>
                                                                                                     <li class="method public">
+        <a href="#method___clone" title="__clone :: Creates new RtmClient instance using heritable client.">
+            <span class="description">Creates new RtmClient instance using heritable client.</span><pre>__clone</pre>
+        </a>
+    </li>
+
+                                                                                                        <li class="method public">
         <a href="#method___construct" title="__construct :: Creates new RtmClient instance.">
             <span class="description">Creates new RtmClient instance.</span><pre>__construct</pre>
         </a>
     </li>
 
-                                                                                                                                                                                                                        <li class="method public">
+                                                                                                                                                                                                                                                                                <li class="method public">
         <a href="#method_close" title="close :: Closes connection.">
             <span class="description">Closes connection.</span><pre>close</pre>
         </a>
@@ -158,6 +164,12 @@
                                                                                                         <li class="method public">
         <a href="#method_getSubscriptions" title="getSubscriptions :: Gets list of current Subscriptions.">
             <span class="description">Gets list of current Subscriptions.</span><pre>getSubscriptions</pre>
+        </a>
+    </li>
+
+                                                                                                        <li class="method public">
+        <a href="#method_isConnected" title="isConnected :: Returns current connection status.">
+            <span class="description">Returns current connection status.</span><pre>isConnected</pre>
         </a>
     </li>
 
@@ -194,6 +206,12 @@
                                                                                                         <li class="method public">
         <a href="#method_onError" title="onError :: Shorthand for on(RtmEvents::ERROR).">
             <span class="description">Shorthand for on(RtmEvents::ERROR).</span><pre>onError</pre>
+        </a>
+    </li>
+
+                                                                                                        <li class="method public">
+        <a href="#method_persistentConnection" title="persistentConnection :: Creates a new RtmClient instance with persistent connection or returns previously created instance.">
+            <span class="description">Creates a new RtmClient instance with persistent connection or returns previously created instance.</span><pre>persistentConnection</pre>
         </a>
     </li>
 
@@ -267,9 +285,14 @@
         </li>
         <li class="nav-header protected">» Protected
             <ul>
-                                                                                                                <li class="method protected">
+                                                                                                                                                    <li class="method protected">
                             <a href="#method_appendVersion" title="appendVersion :: Appends version param to the endpoint.">
                                 <span class="description">Appends version param to the endpoint.</span><pre>appendVersion</pre>
+                            </a>
+                        </li>
+                                                                                <li class="method protected">
+                            <a href="#method_buildConnectionUrl" title="buildConnectionUrl :: Constructs connection URL using endpoint, appkey and optional hash.">
+                                <span class="description">Constructs connection URL using endpoint, appkey and optional hash.</span><pre>buildConnectionUrl</pre>
                             </a>
                         </li>
                                                                                 <li class="method protected">
@@ -282,7 +305,7 @@
                                 <span class="description">Calls disconnect action for all subscriptions.</span><pre>disconnectAllSubscriptions</pre>
                             </a>
                         </li>
-                                                                                                                                                                                                                                                                                                                                                                                                                    <li class="method protected">
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                                            <li class="method protected">
                             <a href="#method_processCallback" title="processCallback :: Wraps user callback function to simplify return codes.">
                                 <span class="description">Wraps user callback function to simplify return codes.</span><pre>processCallback</pre>
                             </a>
@@ -311,7 +334,7 @@
         </li>
         <li class="nav-header private">» Private
             <ul>
-                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                            </ul>
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                            </ul>
         </li>
         <li class="nav-header">
             <i class="icon-custom icon-constant"></i> Constants
@@ -349,6 +372,11 @@
                                 <li class="constant ">
                     <a href="#constant_ERROR_CODE_NOT_CONNECTED" title="ERROR_CODE_NOT_CONNECTED :: ">
                         <span class="description"></span><pre>ERROR_CODE_NOT_CONNECTED</pre>
+                    </a>
+                </li>
+                                <li class="constant ">
+                    <a href="#constant_ERROR_CODE_PERSISTENT_SUBSCRIBE" title="ERROR_CODE_PERSISTENT_SUBSCRIBE :: ">
+                        <span class="description"></span><pre>ERROR_CODE_PERSISTENT_SUBSCRIBE</pre>
                     </a>
                 </li>
                                 <li class="constant ">
@@ -473,8 +501,7 @@ $client = new RtmClient(ENDPOINT, APP_KEY, $options);</code></pre>
 <p>Check the <a href="../classes/RtmClient.Subscription.Subscription.html">\RtmClient\Subscription\Subscription</a> class to get more information
 about the possible options.</p>
 <p>A subscription callback is called when the following subscription events occur:</p>
-<pre><code>INIT - right after subscription instance is created
-SUBSCRIBED - after getting confirmation from Satori RTM about subscription
+<pre><code>SUBSCRIBED - after getting confirmation from Satori RTM about subscription
 UNSUBSCRIBED - after successful unsubscribing
 DATA - when getting rtm/subscription/data from Satori RTM
 INFO - when getting rtm/subscription/info message
@@ -485,10 +512,10 @@ ERROR - on every rtm/subscription/error or rtm/subscribe/error</code></pre>
 $callback = function ($ctx, $type, $data) {
     switch ($type) {
         case Events::SUBSCRIBED:
-            echo 'Subscribed to: ' . $ctx-&gt;getSubscriptionId() . PHP_EOL;
+            echo 'Subscribed to: ' . $ctx['subscription']-&gt;getSubscriptionId() . PHP_EOL;
             break;
         case Events::UNSUBSCRIBED:
-            echo 'Unsubscribed from: ' . $ctx-&gt;getSubscriptionId() . PHP_EOL;
+            echo 'Unsubscribed from: ' . $ctx['subscription']-&gt;getSubscriptionId() . PHP_EOL;
             break;
         case Events::DATA:
             foreach ($data['messages'] as $message) {
@@ -582,6 +609,16 @@ while (true) {
          echo 'Sent messages count' . PHP_EOL;
      });
 }</code></pre>
+<h1>Reconnects</h1>
+<p>An RtmClient instance is a one-time connection. It means that you cannot continue using
+client after connection is dropped.</p>
+<p>To make a new connection to Satori RTM you can clone previous client:</p>
+<pre><code>$new_client = clone $old_client;
+$new_client-&gt;connect();</code></pre>
+<p>All your callbacks will be moved to the new client. After calling <code>connect</code>
+client will establish a new connection to Satori RTM.
+Note that you need to restore your subscriptions manually.</p>
+<p>See <em>reconnects</em> examples.</p>
                     </div>
                     <table class="table table-bordered">
                                                                                     <tr>
@@ -599,7 +636,34 @@ while (true) {
                                                                             </th>
                                     <td>
                                                                                     
-                                                                                <p>Event handlers example</p>
+                                                                                <p>Change filter of existing subscription.</p>
+                                    </td>
+                                </tr>
+                                                            <tr>
+                                    <th>
+                                        example
+                                                                            </th>
+                                    <td>
+                                                                                    
+                                                                                <p>Publish example</p>
+                                    </td>
+                                </tr>
+                                                            <tr>
+                                    <th>
+                                        example
+                                                                            </th>
+                                    <td>
+                                                                                    
+                                                                                <p>Continunously publish with processing disconnects.</p>
+                                    </td>
+                                </tr>
+                                                            <tr>
+                                    <th>
+                                        example
+                                                                            </th>
+                                    <td>
+                                                                                    
+                                                                                <p>Continunously publish and restore subscription on disconnects.</p>
                                     </td>
                                 </tr>
                                                             <tr>
@@ -617,7 +681,7 @@ while (true) {
                                                                             </th>
                                     <td>
                                                                                     
-                                                                                <p>Publish example</p>
+                                                                                <p>Event handlers example</p>
                                     </td>
                                 </tr>
                                                                                                                 <tr>
@@ -632,7 +696,41 @@ while (true) {
                                                                                                                                                                                 </table>
 
                     <h3><i class="icon-custom icon-method"></i> Methods</h3>
-                                                                <a id="method___construct"></a>
+                                                                <a id="method___clone"></a>
+                        <div class="element clickable method public  method___clone" data-toggle="collapse" data-target=".method___clone .collapse">
+                            <h2>Creates new RtmClient instance using heritable client.</h2>
+                            <pre>__clone() </pre>
+                            <div class="labels">
+                                                                                                                                                                                            </div>
+
+                            
+                            <div class="row collapse">
+                                <div class="detail-description">
+                                    <div class="long_description"><p>Uses previously added client callbacks and subscriptions.</p></div>
+
+                                    <table class="table">
+                                                                                    <tr>
+                                                <th>
+                                                    
+                                                </th>
+                                                <td>
+                                                                                                    </td>
+                                            </tr>
+                                                                                    <tr>
+                                                <th>
+                                                    
+                                                </th>
+                                                <td>
+                                                                                                    </td>
+                                            </tr>
+                                                                                                                    </table>
+
+                                    
+                                                                    </div>
+                            </div>
+
+                        </div>
+                                            <a id="method___construct"></a>
                         <div class="element clickable method public  method___construct" data-toggle="collapse" data-target=".method___construct .collapse">
                             <h2>Creates new RtmClient instance.</h2>
                             <pre>__construct(string $endpoint, string $appkey, array $options = array()) </pre>
@@ -662,6 +760,8 @@ while (true) {
                                                         <dd><p>if appkey is empty</p></dd>
                                                                                                             <dt>\RtmClient\Exceptions\ApplicationException</dt>
                                                         <dd><p>if Auth does not implement iAuth interface</p></dd>
+                                                                                                            <dt>\RtmClient\Exceptions\ApplicationException</dt>
+                                                        <dd><p>if wrong arguments count passed</p></dd>
                                                                                                             <dt>\RtmClient\WebSocket\Exceptions\BadSchemeException</dt>
                                                         <dd><p>if endpoint has bad schema</p></dd>
                                                                                                                                                             </dl>
@@ -696,7 +796,7 @@ while (true) {
                             <h2>Appends version param to the endpoint.</h2>
                             <pre>appendVersion(string $endpoint) : string</pre>
                             <div class="labels">
-                                                                                                                                                                                            </div>
+                                                                <span class="label">static</span>                                                                                                                            </div>
 
                             
                             <div class="row collapse">
@@ -715,6 +815,41 @@ After: wss://some.endpoint.com/v2</code></pre></div>
                                                                             
                                                                             <h3>Response</h3>
                                         <code>string</code><p><p>Endpoint with added RTM_VER.</p></p>
+                                                                    </div>
+                            </div>
+
+                        </div>
+                                            <a id="method_buildConnectionUrl"></a>
+                        <div class="element clickable method protected  method_buildConnectionUrl" data-toggle="collapse" data-target=".method_buildConnectionUrl .collapse">
+                            <h2>Constructs connection URL using endpoint, appkey and optional hash.</h2>
+                            <pre>buildConnectionUrl(string $endpoint, string $appkey, string $hash = &#039;&#039;) : string</pre>
+                            <div class="labels">
+                                                                <span class="label">static</span>                                                                                                                            </div>
+
+                            
+                            <div class="row collapse">
+                                <div class="detail-description">
+                                    <div class="long_description"></div>
+
+                                    <table class="table">
+                                                                                                                    </table>
+
+                                                                            <h3>Arguments</h3>
+                                                                                    <div class="subelement argument">
+                                                <h4>$endpoint</h4>
+                                                <code>string</code><p><p>Server URL with schema</p></p>
+                                            </div>
+                                                                                    <div class="subelement argument">
+                                                <h4>$appkey</h4>
+                                                <code>string</code><p><p>Application key</p></p>
+                                            </div>
+                                                                                    <div class="subelement argument">
+                                                <h4>$hash</h4>
+                                                <code>string</code><p><p>URL hash. Uses for persistent connections</p></p>
+                                            </div>
+                                                                            
+                                                                            <h3>Response</h3>
+                                        <code>string</code><p></p>
                                                                     </div>
                             </div>
 
@@ -749,7 +884,7 @@ After: wss://some.endpoint.com/v2</code></pre></div>
                                             <a id="method_close"></a>
                         <div class="element clickable method public  method_close" data-toggle="collapse" data-target=".method_close .collapse">
                             <h2>Closes connection.</h2>
-                            <pre>close() : void</pre>
+                            <pre>close(integer $status = 1000, string $reason = &#039;Connection closed&#039;) : void</pre>
                             <div class="labels">
                                                                                                                                                                                             </div>
 
@@ -759,16 +894,18 @@ After: wss://some.endpoint.com/v2</code></pre></div>
                                     <div class="long_description"></div>
 
                                     <table class="table">
-                                                                                    <tr>
-                                                <th>
-                                                    
-                                                </th>
-                                                <td>
-                                                                                                    </td>
-                                            </tr>
                                                                                                                     </table>
 
-                                    
+                                                                            <h3>Arguments</h3>
+                                                                                    <div class="subelement argument">
+                                                <h4>$status</h4>
+                                                <code>integer</code><p><p>Close status code.</p></p>
+                                            </div>
+                                                                                    <div class="subelement argument">
+                                                <h4>$reason</h4>
+                                                <code>string</code><p><p>Any message that will be send in close frame.</p></p>
+                                            </div>
+                                                                            
                                                                     </div>
                             </div>
 
@@ -977,6 +1114,35 @@ PDU that represents the request.</p></p>
                             </div>
 
                         </div>
+                                            <a id="method_isConnected"></a>
+                        <div class="element clickable method public  method_isConnected" data-toggle="collapse" data-target=".method_isConnected .collapse">
+                            <h2>Returns current connection status.</h2>
+                            <pre>isConnected() : boolean</pre>
+                            <div class="labels">
+                                                                                                                                                                                            </div>
+
+                            
+                            <div class="row collapse">
+                                <div class="detail-description">
+                                    <div class="long_description"></div>
+
+                                    <table class="table">
+                                                                                    <tr>
+                                                <th>
+                                                    
+                                                </th>
+                                                <td>
+                                                                                                    </td>
+                                            </tr>
+                                                                                                                    </table>
+
+                                    
+                                                                            <h3>Response</h3>
+                                        <code>boolean</code><p><p>true if connected, false otherwise</p></p>
+                                                                    </div>
+                            </div>
+
+                        </div>
                                             <a id="method_off"></a>
                         <div class="element clickable method public  method_off inherited" data-toggle="collapse" data-target=".method_off .collapse">
                             <h2>Unsubscribes from an event.</h2>
@@ -1089,7 +1255,10 @@ PDU that represents the request.</p></p>
                             
                             <div class="row collapse">
                                 <div class="detail-description">
-                                    <div class="long_description"><p>callback function params:</p>
+                                    <div class="long_description"><p>Called when connection has been established and authentication (optional) is completed.
+If connection type is persistent the event will be called after getting previously
+established connection.</p>
+<p>callback function params:</p>
 <ul>
 <li>none</li>
 </ul></div>
@@ -1171,6 +1340,73 @@ PDU that represents the request.</p></p>
                                                                             
                                                                             <h3>Response</h3>
                                         <code>$this</code><p></p>
+                                                                    </div>
+                            </div>
+
+                        </div>
+                                            <a id="method_persistentConnection"></a>
+                        <div class="element clickable method public  method_persistentConnection" data-toggle="collapse" data-target=".method_persistentConnection .collapse">
+                            <h2>Creates a new RtmClient instance with persistent connection or returns previously created instance.</h2>
+                            <pre>persistentConnection(string $endpoint, string $appkey, array $options = array()) </pre>
+                            <div class="labels">
+                                                                <span class="label">static</span>                                                                                                                            </div>
+
+                            
+                            <div class="row collapse">
+                                <div class="detail-description">
+                                    <div class="long_description"><p>Endpoint, appkey and optional connection_id is a key to check if instance has been previously created.</p>
+<p>Singleton.</p></div>
+
+                                    <table class="table">
+                                                                                    <tr>
+                                                <th>
+                                                    
+                                                </th>
+                                                <td>
+                                                                                                    </td>
+                                            </tr>
+                                                                                                                            <tr>
+                                                <th>Throws</th>
+                                                <td>
+                                                    <dl>
+                                                                                                            <dt>\RtmClient\Exceptions\ApplicationException</dt>
+                                                        <dd><p>if endpoint is empty</p></dd>
+                                                                                                            <dt>\RtmClient\Exceptions\ApplicationException</dt>
+                                                        <dd><p>if appkey is empty</p></dd>
+                                                                                                            <dt>\RtmClient\Exceptions\ApplicationException</dt>
+                                                        <dd><p>if Auth does not implement iAuth interface</p></dd>
+                                                                                                            <dt>\RtmClient\Exceptions\ApplicationException</dt>
+                                                        <dd><p>if wrong arguments count passed</p></dd>
+                                                                                                            <dt>\RtmClient\WebSocket\Exceptions\BadSchemeException</dt>
+                                                        <dd><p>if endpoint has bad schema</p></dd>
+                                                                                                                                                            </dl>
+                                                </td>
+                                            </tr>
+                                                                            </table>
+
+                                                                            <h3>Arguments</h3>
+                                                                                    <div class="subelement argument">
+                                                <h4>$endpoint</h4>
+                                                <code>string</code><p><p>Endpoint for RTM. Available from the Dev Portal</p></p>
+                                            </div>
+                                                                                    <div class="subelement argument">
+                                                <h4>$appkey</h4>
+                                                <code>string</code><p><p>Appkey used to access RTM. Available from the Dev Portal</p></p>
+                                            </div>
+                                                                                    <div class="subelement argument">
+                                                <h4>$options</h4>
+                                                <code>array</code><p><p>Additional parameters for the RTM client instance</p>
+<pre><code>$options = [
+  'auth'   =&gt; (Auth\iAuth) Any instance that implements iAuth instance
+  'logger' =&gt; (\Psr\Log\LoggerInterface Custom logger
+  'connection_id'   =&gt; string Provides ability to create different connections to the same endpoint
+]</code></pre>
+<p>Usage:</p>
+<pre><code>     $client = RtmClient::persistentConnection('wss://endpoint.satori.com', 'appkey1234', array(
+         'connection_id' =&gt; 'connection1', // optional
+     ));</code></pre></p>
+                                            </div>
+                                                                            
                                                                     </div>
                             </div>
 
@@ -1739,6 +1975,8 @@ $subscription = $client-&gt;subscribe('animals', array(
                                                     <dl>
                                                                                                             <dt>\RtmClient\WebSocket\Exceptions\ConnectionException</dt>
                                                         <dd><p>when connection is broken, unable to connect or send/read from the connection</p></dd>
+                                                                                                            <dt>\RtmClient\Exceptions\ApplicationException</dt>
+                                                        <dd><p>when using persistent connection</p></dd>
                                                                                                                                                             </dl>
                                                 </td>
                                             </tr>
@@ -2160,6 +2398,27 @@ PDU that represents the request.</p></p>
                                     </div>
                                 </div>
                             </div>
+                                                    <a id="constant_ERROR_CODE_PERSISTENT_SUBSCRIBE"> </a>
+                            <div class="element clickable constant  constant_ERROR_CODE_PERSISTENT_SUBSCRIBE" data-toggle="collapse" data-target=".constant_ERROR_CODE_PERSISTENT_SUBSCRIBE .collapse">
+                                <h2>ERROR_CODE_PERSISTENT_SUBSCRIBE</h2>
+                                <pre>ERROR_CODE_PERSISTENT_SUBSCRIBE</pre>
+                                <div class="labels">
+                                                                    </div>
+                                <div class="row collapse">
+                                    <div class="detail-description">
+                                        <div class="long_description"></div>
+                                        <table class="table">
+                                                                                            <tr>
+                                                    <th>
+                                                        
+                                                    </th>
+                                                    <td>
+                                                                                                            </td>
+                                                </tr>
+                                                                                    </table>
+                                    </div>
+                                </div>
+                            </div>
                                             
                                                                 <h3><i class="icon-custom icon-property"></i> Properties</h3>
                                                     <a id="property_connection"> </a>
@@ -2391,7 +2650,7 @@ that were not passed to fire()</p></div>
             Template is built using <a href="http://twitter.github.com/bootstrap/">Twitter Bootstrap 2</a> and icons provided by
             <a href="http://glyphicons.com/">Glyphicons</a>.<br/>
             Documentation is powered by <a href="http://www.phpdoc.org/">phpDocumentor </a> and<br/>
-            generated on Thu, 31 Aug 2017 06:26:43 -0700.<br/>
+            generated on Wed, 11 Oct 2017 04:56:49 -0700.<br/>
     </footer>
     </body>
 </html>

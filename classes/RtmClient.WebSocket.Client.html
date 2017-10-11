@@ -126,12 +126,6 @@
     </li>
 
                                                                                                         <li class="method public">
-        <a href="#method___destruct" title="__destruct :: Closes socket connection and frees resources.">
-            <span class="description">Closes socket connection and frees resources.</span><pre>__destruct</pre>
-        </a>
-    </li>
-
-                                                                                                        <li class="method public">
         <a href="#method_close" title="close :: Closes connection.">
             <span class="description">Closes connection.</span><pre>close</pre>
         </a>
@@ -146,6 +140,12 @@
                                                                                                                                                                 <li class="method public">
         <a href="#method_isConnected" title="isConnected :: Returns current connection state.">
             <span class="description">Returns current connection state.</span><pre>isConnected</pre>
+        </a>
+    </li>
+
+                                                                                                        <li class="method public">
+        <a href="#method_isReusedPersistentConnection" title="isReusedPersistentConnection :: Checks if the connection is persistent and was reused.">
+            <span class="description">Checks if the connection is persistent and was reused.</span><pre>isReusedPersistentConnection</pre>
         </a>
     </li>
 
@@ -165,12 +165,12 @@
         </li>
         <li class="nav-header protected">» Protected
             <ul>
-                                                                                                                                                                                                                            <li class="method protected">
+                                                                                                                                                                                        <li class="method protected">
                             <a href="#method_generateSecKey" title="generateSecKey :: Generates pseudo bytes hex hash.">
                                 <span class="description">Generates pseudo bytes hex hash.</span><pre>generateSecKey</pre>
                             </a>
                         </li>
-                                                                                                                    <li class="method protected">
+                                                                                                                                                        <li class="method protected">
                             <a href="#method_parseUrl" title="parseUrl :: Splits url to parts.">
                                 <span class="description">Splits url to parts.</span><pre>parseUrl</pre>
                             </a>
@@ -302,6 +302,7 @@
 <pre><code>$options = [
   'timeout'       =&gt; (int) Number of seconds until the connect() system call should timeout
   'fragment_size' =&gt; (int) Split message to frames when exceeded fragment size limit
+  'logger'        =&gt; (Psr\Log\LoggerInterface) Logger
 ]</code></pre></p>
                                             </div>
                                                                             
@@ -309,44 +310,10 @@
                             </div>
 
                         </div>
-                                            <a id="method___destruct"></a>
-                        <div class="element clickable method public  method___destruct" data-toggle="collapse" data-target=".method___destruct .collapse">
-                            <h2>Closes socket connection and frees resources.</h2>
-                            <pre>__destruct() </pre>
-                            <div class="labels">
-                                                                                                                                                                                            </div>
-
-                            
-                            <div class="row collapse">
-                                <div class="detail-description">
-                                    <div class="long_description"></div>
-
-                                    <table class="table">
-                                                                                    <tr>
-                                                <th>
-                                                    
-                                                </th>
-                                                <td>
-                                                                                                    </td>
-                                            </tr>
-                                                                                    <tr>
-                                                <th>
-                                                    
-                                                </th>
-                                                <td>
-                                                                                                    </td>
-                                            </tr>
-                                                                                                                    </table>
-
-                                    
-                                                                    </div>
-                            </div>
-
-                        </div>
                                             <a id="method_close"></a>
                         <div class="element clickable method public  method_close" data-toggle="collapse" data-target=".method_close .collapse">
                             <h2>Closes connection.</h2>
-                            <pre>close(integer $status = 1000, string $message = null, integer $timeout = self::DEFAULT_TIMEOUT_SEC) : array</pre>
+                            <pre>close(integer $status = 1000, string $reason = null, integer $timeout = self::DEFAULT_TIMEOUT_SEC) : array</pre>
                             <div class="labels">
                                                                                                                                                                                             </div>
 
@@ -364,7 +331,7 @@
                                                 <code>integer</code><p><p>Close status code</p></p>
                                             </div>
                                                                                     <div class="subelement argument">
-                                                <h4>$message</h4>
+                                                <h4>$reason</h4>
                                                 <code>string</code><p><p>Any message that will be send in close frame</p></p>
                                             </div>
                                                                                     <div class="subelement argument">
@@ -476,6 +443,36 @@
                                     
                                                                             <h3>Response</h3>
                                         <code>boolean</code><p><p>true if connected, false otherwise</p></p>
+                                                                    </div>
+                            </div>
+
+                        </div>
+                                            <a id="method_isReusedPersistentConnection"></a>
+                        <div class="element clickable method public  method_isReusedPersistentConnection" data-toggle="collapse" data-target=".method_isReusedPersistentConnection .collapse">
+                            <h2>Checks if the connection is persistent and was reused.</h2>
+                            <pre>isReusedPersistentConnection() : boolean</pre>
+                            <div class="labels">
+                                                                                                                                                                                            </div>
+
+                            
+                            <div class="row collapse">
+                                <div class="detail-description">
+                                    <div class="long_description"></div>
+
+                                    <table class="table">
+                                                                                    <tr>
+                                                <th>
+                                                    
+                                                </th>
+                                                <td>
+                                                                                                    </td>
+                                            </tr>
+                                                                                                                    </table>
+
+                                    
+                                                                            <h3>Response</h3>
+                                        <code>boolean</code><p><p>true if the connection is persistent and was reused.
+false otherwise</p></p>
                                                                     </div>
                             </div>
 
@@ -1010,6 +1007,32 @@
                                                                             </div>
                                 </div>
                             </div>
+                                                    <a id="property_is_reused_p_connection"> </a>
+                            <div class="element clickable property  protected property_is_reused_p_connection" data-toggle="collapse" data-target=".property_is_reused_p_connection .collapse">
+                                <h2>Flag used for peristent connection status</h2>
+                                <pre>is_reused_p_connection : boolean</pre>
+                                <div class="labels">
+                                                                                                        </div>
+                                <div class="row collapse">
+                                    <div class="detail-description">
+                                        <div class="long_description"></div>
+
+                                        <table class="table">
+                                                                                            <tr>
+                                                    <th>
+                                                        var
+                                                    </th>
+                                                    <td>
+                                                                                                                    
+                                                                                                            </td>
+                                                </tr>
+                                                                                    </table>
+
+                                                                                    <h3>Type(s)</h3>
+                                            <code>boolean</code>
+                                                                            </div>
+                                </div>
+                            </div>
                                                     <a id="property_is_closing"> </a>
                             <div class="element clickable property  protected property_is_closing" data-toggle="collapse" data-target=".property_is_closing .collapse">
                                 <h2>Socket state after call close()</h2>
@@ -1019,6 +1042,32 @@
                                 <div class="row collapse">
                                     <div class="detail-description">
                                         <div class="long_description"></div>
+
+                                        <table class="table">
+                                                                                            <tr>
+                                                    <th>
+                                                        var
+                                                    </th>
+                                                    <td>
+                                                                                                                    
+                                                                                                            </td>
+                                                </tr>
+                                                                                    </table>
+
+                                                                                    <h3>Type(s)</h3>
+                                            <code>boolean</code>
+                                                                            </div>
+                                </div>
+                            </div>
+                                                    <a id="property_frame_processing_in_progress"> </a>
+                            <div class="element clickable property  protected property_frame_processing_in_progress" data-toggle="collapse" data-target=".property_frame_processing_in_progress .collapse">
+                                <h2>Frame processing flag.</h2>
+                                <pre>frame_processing_in_progress : boolean</pre>
+                                <div class="labels">
+                                                                                                        </div>
+                                <div class="row collapse">
+                                    <div class="detail-description">
+                                        <div class="long_description"><p>Uses to drop a connection in case if script died, but only a part of a frame was read or sent.</p></div>
 
                                         <table class="table">
                                                                                             <tr>
@@ -1056,7 +1105,7 @@
             Template is built using <a href="http://twitter.github.com/bootstrap/">Twitter Bootstrap 2</a> and icons provided by
             <a href="http://glyphicons.com/">Glyphicons</a>.<br/>
             Documentation is powered by <a href="http://www.phpdoc.org/">phpDocumentor </a> and<br/>
-            generated on Thu, 31 Aug 2017 06:26:43 -0700.<br/>
+            generated on Wed, 11 Oct 2017 04:56:48 -0700.<br/>
     </footer>
     </body>
 </html>

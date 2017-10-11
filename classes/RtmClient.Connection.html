@@ -137,6 +137,12 @@
         </a>
     </li>
 
+                                                                                                        <li class="method public">
+        <a href="#method_isReusedPersistentConnection" title="isReusedPersistentConnection :: Checks if the connection is persistent and was reused.">
+            <span class="description">Checks if the connection is persistent and was reused.</span><pre>isReusedPersistentConnection</pre>
+        </a>
+    </li>
+
                                                                                                                                                                 <li class="method public">
         <a href="#method_read" title="read :: Reads data from the connection and converts to PDU.">
             <span class="description">Reads data from the connection and converts to PDU.</span><pre>read</pre>
@@ -170,7 +176,7 @@
                                 <span class="description">Closes awating callbacks.</span><pre>closeCallbacks</pre>
                             </a>
                         </li>
-                                                                                                                    <li class="method protected">
+                                                                                                                                                        <li class="method protected">
                             <a href="#method_nextId" title="nextId :: Generates next ID for PDU.">
                                 <span class="description">Generates next ID for PDU.</span><pre>nextId</pre>
                             </a>
@@ -179,7 +185,7 @@
         </li>
         <li class="nav-header private">» Private
             <ul>
-                                                                                                                                                                                                                                                                                                                                                                                </ul>
+                                                                                                                                                                                                                                                                                                                                                                                                                    </ul>
         </li>
         <li class="nav-header">
             <i class="icon-custom icon-constant"></i> Constants
@@ -269,7 +275,7 @@ Uses WebSocket client to connect to RTM.</p>
                                             <a id="method_close"></a>
                         <div class="element clickable method public  method_close" data-toggle="collapse" data-target=".method_close .collapse">
                             <h2>Closes connection.</h2>
-                            <pre>close(string $reason = &#039;Connection closed&#039;) : true</pre>
+                            <pre>close(integer $status = 1000, string $reason = &#039;Connection closed&#039;) : true</pre>
                             <div class="labels">
                                                                                                                                                                                             </div>
 
@@ -283,8 +289,12 @@ Uses WebSocket client to connect to RTM.</p>
 
                                                                             <h3>Arguments</h3>
                                                                                     <div class="subelement argument">
+                                                <h4>$status</h4>
+                                                <code>integer</code><p><p>Close status code</p></p>
+                                            </div>
+                                                                                    <div class="subelement argument">
                                                 <h4>$reason</h4>
-                                                <code>string</code><p><p>Close reason. All unprocessed callbacks will get this reason.</p></p>
+                                                <code>string</code><p><p>Any message that will be send in close frame. All unprocessed callbacks will get this reason.</p></p>
                                             </div>
                                                                             
                                                                             <h3>Response</h3>
@@ -353,6 +363,36 @@ from Satori RTM.</p></div>
                                     
                                                                             <h3>Response</h3>
                                         <code>true</code><p></p>
+                                                                    </div>
+                            </div>
+
+                        </div>
+                                            <a id="method_isReusedPersistentConnection"></a>
+                        <div class="element clickable method public  method_isReusedPersistentConnection" data-toggle="collapse" data-target=".method_isReusedPersistentConnection .collapse">
+                            <h2>Checks if the connection is persistent and was reused.</h2>
+                            <pre>isReusedPersistentConnection() : boolean</pre>
+                            <div class="labels">
+                                                                                                                                                                                            </div>
+
+                            
+                            <div class="row collapse">
+                                <div class="detail-description">
+                                    <div class="long_description"></div>
+
+                                    <table class="table">
+                                                                                    <tr>
+                                                <th>
+                                                    
+                                                </th>
+                                                <td>
+                                                                                                    </td>
+                                            </tr>
+                                                                                                                    </table>
+
+                                    
+                                                                            <h3>Response</h3>
+                                        <code>boolean</code><p><p>true if the connection is persistent and was reused.
+false otherwise</p></p>
                                                                     </div>
                             </div>
 
@@ -676,7 +716,7 @@ from Satori RTM.</p></div>
             Template is built using <a href="http://twitter.github.com/bootstrap/">Twitter Bootstrap 2</a> and icons provided by
             <a href="http://glyphicons.com/">Glyphicons</a>.<br/>
             Documentation is powered by <a href="http://www.phpdoc.org/">phpDocumentor </a> and<br/>
-            generated on Thu, 31 Aug 2017 06:26:43 -0700.<br/>
+            generated on Wed, 11 Oct 2017 04:56:48 -0700.<br/>
     </footer>
     </body>
 </html>

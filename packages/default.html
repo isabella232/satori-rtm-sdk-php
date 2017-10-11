@@ -382,7 +382,6 @@ about the possible options.
 
 A subscription callback is called when the following subscription events occur:
 ```
-INIT - right after subscription instance is created
 SUBSCRIBED - after getting confirmation from Satori RTM about subscription
 UNSUBSCRIBED - after successful unsubscribing
 DATA - when getting rtm/subscription/data from Satori RTM
@@ -397,10 +396,10 @@ use RtmClient\Subscription\Events;
 $callback = function ($ctx, $type, $data) {
     switch ($type) {
         case Events::SUBSCRIBED:
-            echo &#039;Subscribed to: &#039; . $ctx-&gt;getSubscriptionId() . PHP_EOL;
+            echo &#039;Subscribed to: &#039; . $ctx[&#039;subscription&#039;]-&gt;getSubscriptionId() . PHP_EOL;
             break;
         case Events::UNSUBSCRIBED:
-            echo &#039;Unsubscribed from: &#039; . $ctx-&gt;getSubscriptionId() . PHP_EOL;
+            echo &#039;Unsubscribed from: &#039; . $ctx[&#039;subscription&#039;]-&gt;getSubscriptionId() . PHP_EOL;
             break;
         case Events::DATA:
             foreach ($data[&#039;messages&#039;] as $message) {
@@ -512,7 +511,25 @@ while (true) {
          echo &#039;Sent messages count&#039; . PHP_EOL;
      });
 }
-```</div>
+```
+
+Reconnects
+=============================================
+
+An RtmClient instance is a one-time connection. It means that you cannot continue using
+client after connection is dropped.
+
+To make a new connection to Satori RTM you can clone previous client:
+```
+$new_client = clone $old_client;
+$new_client-&gt;connect();
+```
+
+All your callbacks will be moved to the new client. After calling `connect`
+client will establish a new connection to Satori RTM.
+Note that you need to restore your subscriptions manually.
+
+See *reconnects* examples.</div>
         <a href="../classes/RtmClient.RtmClient.html" class="more">« More »</a>
     </div>
 
@@ -548,7 +565,7 @@ while (true) {
             Template is built using <a href="http://twitter.github.com/bootstrap/">Twitter Bootstrap 2</a> and icons provided by
             <a href="http://glyphicons.com/">Glyphicons</a>.<br/>
             Documentation is powered by <a href="http://www.phpdoc.org/">phpDocumentor </a> and<br/>
-            generated on Thu, 31 Aug 2017 06:26:43 -0700.<br/>
+            generated on Wed, 11 Oct 2017 04:56:48 -0700.<br/>
     </footer>
     </body>
 </html>
