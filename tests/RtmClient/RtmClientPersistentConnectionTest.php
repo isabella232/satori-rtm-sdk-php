@@ -4,7 +4,8 @@ namespace Tests\RtmClient;
 
 use Tests\RtmClientBaseTestCase;
 use Tests\Helpers\RoleAuthExt;
-use \Tests\Helpers\StorageLogger;
+use Tests\Helpers\StorageLogger;
+use Tests\Helpers\RtmClientExt;
 use RtmClient\RtmClient;
 use RtmClient\Auth\RoleAuth;
 
@@ -71,12 +72,11 @@ class RtmClientPersistentConnectionTest extends RtmClientBaseTestCase
         $options = array(
             'auth' => $auth,
         );
-        $client = RtmClient::persistentConnection($this->credentials['endpoint'], $this->credentials['appkey'], $options);
+        $client = RtmClientExt::persistentConnection($this->credentials['endpoint'], $this->credentials['appkey'], $options);
         if (!$client->connect()) {
             $this->fail('Unable to connect');
         }
         $auth->setAuthInProgress(true);
-
         register_shutdown_function(function () use ($logger) {
             $last_log = array_pop($logger->storage);
             $this->assertEquals('error', $last_log['type']);

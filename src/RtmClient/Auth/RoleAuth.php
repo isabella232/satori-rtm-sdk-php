@@ -61,15 +61,6 @@ class RoleAuth implements iAuth
         $this->role_secret = $role_secret;
 
         $this->logger = !empty($options['logger']) ? $options['logger'] : new Logger();
-
-        $check_auth_state = function () {
-            if ($this->auth_in_progress) {
-                // Auth still in progress but script died. Drop the connection.
-                $this->logger->error('Connection dropped because auth still in progess, but script died');
-                $this->connection->close('Auth still in progress');
-            }
-        };
-        register_shutdown_function($check_auth_state);
     }
 
     /**
@@ -84,6 +75,15 @@ class RoleAuth implements iAuth
     {
         $this->auth_in_progress = true;
         $this->connection = $connection;
+
+        $check_auth_state = function () {
+            if ($this->auth_in_progress) {
+                // Auth still in progress but script died. Drop the connection.
+                $this->logger->error('Connection dropped because auth still in progess, but script died');
+                $this->connection->close('Auth still in progress');
+            }
+        };
+        register_shutdown_function($check_auth_state);
 
         if (!$this->connection->isReusedPersistentConnection()) {
             $this->logger->info('Auth: Starting authentication');
