@@ -1054,6 +1054,11 @@ class RtmClient extends Observable
         return $this;
     }
 
+    /**
+     * Returns current connection status.
+     *
+     * @return boolean true if connected, false otherwise
+     */
     public function isConnected()
     {
         return $this->is_connected;

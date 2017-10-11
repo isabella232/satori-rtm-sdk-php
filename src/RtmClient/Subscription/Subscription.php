@@ -98,6 +98,13 @@ class Subscription
         $this->logger = $logger;
     }
 
+    /**
+     * Sets new subscription context variable.
+     * Context is passed to subscription callback.
+     *
+     * @param string $key Context key
+     * @param mixed $context Context value
+     */
     public function setContext($key, $context)
     {
         $this->context[$key] = $context;
