@@ -176,7 +176,7 @@ use RtmClient\Subscription\Subscription;
  * $client->publish(CHANNEL, 'test message', function ($ack) {
  *      echo 'Got ack from Satori RTM';
  * });
- * $client->tcpReadSync(); // Wait for reply from Satori RTM
+ * $client->sockReadSync(); // Wait for reply from Satori RTM
  * ```
  *
  * In case if you do not want to wait too much time on reading use **timeout**:
@@ -185,7 +185,7 @@ use RtmClient\Subscription\Subscription;
  * $client->publish(CHANNEL, 'test message', function ($ack) {
  *      echo 'Got ack from Satori RTM';
  * });
- * $client->tcpReadSync(2); // Wait for incoming message for 2 seconds only
+ * $client->sockReadSync(2); // Wait for incoming message for 2 seconds only
  * ```
  *
  * If you await multiple replies use {@see RtmClient::waitAllReplies()}
@@ -219,7 +219,7 @@ use RtmClient\Subscription\Subscription;
  * $client->publish(CHANNEL, 'test message', function ($ack) {
  *      echo 'Got ack from Satori RTM';
  * });
- * $code = $client->tcpReadAsync();
+ * $code = $client->sockReadAsync();
  * switch ($code) {
  *  case RC::READ_OK:
  *      echo 'Read incoming message';
@@ -233,7 +233,7 @@ use RtmClient\Subscription\Subscription;
  * ```
  *
  * If you subscribe to the channels and want to publish messages in the same time you can
- * use tcpReadAsync or Async helpers: {@see RtmClient::sockReadIncoming()} or {@see RtmClient::sockReadFor()}
+ * use sockReadAsync or Async helpers: {@see RtmClient::sockReadIncoming()} or {@see RtmClient::sockReadFor()}
  * ```
  * $messages_count = 0;
  * $client = new RtmClient(ENDPOINT, APP_KEY);
