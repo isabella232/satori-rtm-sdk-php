@@ -141,10 +141,9 @@ But this solution has a number of limitations:
 
 Usage:
 ```
-$options = array(
-  'persistent_connection' => true,
-);
-$client = new RtmClient(ENDPOINT, APP_KEY, $options);
+$client = RtmClient::persistentConnection('wss://endpoint.satori.com', 'appkey1234', array(
+    'connection_id' => 'connection1', // optional
+));
 $client->connect();
 ```
 
