@@ -10,31 +10,23 @@ use RtmClient\Exceptions\ApplicationException;
 class Helper
 {
     /**
-     * Converts json-string to \RtmClient\Pdu\Pdu.
+     * Converts array to \RtmClient\Pdu\Pdu.
      *
-     * @param string $json_string
+     * @param array $struct
      * @return \RtmClient\Pdu\Pdu
-     * @throws ApplicationException if failed to parse json string
      * @throws ApplicationException if missing "action" or "body" field in received PDU
      */
-    public static function convertToPdu($json_string)
+    public static function convertToPdu($struct)
     {
-        if (null === $json = json_decode($json_string, true)) {
-            throw new ApplicationException(
-                'Bad PDU received' . PHP_EOL
-                . $json_string
-            );
-        }
-
-        if (!isset($json['action']) || !isset($json['body'])) {
+        if (!isset($struct['action']) || !isset($struct['body'])) {
             throw new ApplicationException(
                 'Missing "action" or "body" field in received PDU' . PHP_EOL
-                . $json_string
+                . json_encode($struct)
             );
         }
 
-        $id = isset($json['id']) ? $json['id'] : null;
-        return new Pdu($json['action'], $json['body'], $id);
+        $id = isset($struct['id']) ? $struct['id'] : null;
+        return new Pdu($struct['action'], $struct['body'], $id);
     }
 
     /**

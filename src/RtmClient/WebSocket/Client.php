@@ -42,6 +42,9 @@ class Client
      */
     const ASYNC_READ = 2;
 
+    const SUB_PROTOCOL_JSON = 'json';
+    const SUB_PROTOCOL_CBOR = 'cbor';
+
     /**
      * stream_socket_client instance
      *
@@ -85,9 +88,12 @@ class Client
      * @param array $options Websocket client options
      *
      *     $options = [
-     *       'timeout'       => (int) Number of seconds until the connect() system call should timeout
-     *       'fragment_size' => (int) Split message to frames when exceeded fragment size limit
-     *       'logger'        => (Psr\Log\LoggerInterface) Logger
+     *       'timeout'               => (int) Number of seconds until the connect() system call should timeout
+     *       'fragment_size'         => (int) Split message to frames when exceeded fragment size limit
+     *       'logger'                => (Psr\Log\LoggerInterface) Logger
+     *       'persistent_connection' => (bool) Flag that determines if we want to use persistent connection
+     *       'connection_id'         => (string) Unique connection identifier. Used with 'persistent_connection' flag
+     *       'sub_protocol'          => (string) Websocket sub-protocol
      *     ]
      */
     public function __construct($url, $options = array())
@@ -97,6 +103,7 @@ class Client
             'fragment_size' => Client::DEFAULT_FRAGMENT_SIZE,
             'persistent_connection' => false,
             'connection_id' => null,
+            'sub_protocol' => Client::SUB_PROTOCOL_JSON,
         );
 
         $this->options = array_merge($default, $options);
@@ -194,6 +201,7 @@ class Client
                 'Upgrade: websocket',
                 'Sec-WebSocket-Key: ' . $key,
                 'Sec-WebSocket-Version: 13',
+                'Sec-WebSocket-Protocol: ' . $this->options['sub_protocol'],
             );
 
             $this->socketWrite(
