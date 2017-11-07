@@ -60,7 +60,14 @@ class PduHelperTest extends RtmClientBaseTestCase
     public function testConvertToPdu()
     {
         try {
-            $pdu = Helper::convertToPdu('{"action": "rtm/publish/ok", "body": {"message": "aaa"}, "id": 123}');
+            $struct = array(
+                'action' => 'rtm/publish/ok',
+                'body' => array(
+                    'message' => 'aaa',
+                ),
+                'id' => 123,
+            );
+            $pdu = Helper::convertToPdu($struct);
             $this->assertEquals($pdu->action, 'rtm/publish/ok');
             $this->assertEquals($pdu->body, array(
                 'message' => 'aaa',
