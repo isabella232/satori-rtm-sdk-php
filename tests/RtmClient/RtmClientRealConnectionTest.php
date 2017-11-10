@@ -88,9 +88,12 @@ class RtmClientRealConnectionTest extends RtmClientBaseTestCase
         }
     }
 
-    public function testCloseConnection()
+    /**
+     * @dataProvider protocols
+     */
+    public function testCloseConnection($protocol)
     {
-        $client = $this->establishConnection();
+        $client = $this->establishConnection($protocol);
         $event = false;
         $client->onDisconnected(function ($code, $reason) use (&$event) {
             $this->assertEquals($code, 1000);
@@ -137,10 +140,13 @@ class RtmClientRealConnectionTest extends RtmClientBaseTestCase
         $this->assertEquals($events, 2);
     }
 
-    public function testUnsolicitedErrorPdu()
+    /**
+     * @dataProvider protocols
+     */
+    public function testUnsolicitedErrorPdu($protocol)
     {
         $events = 0;
-        $client = $this->establishConnection();
+        $client = $this->establishConnection($protocol);
         $client->onDisconnected(function ($code, $reason) use (&$events) {
             $this->assertEquals(1008, $code);
             $events++;
@@ -170,5 +176,13 @@ class RtmClientRealConnectionTest extends RtmClientBaseTestCase
 
         $this->assertEquals(2, $events);
         $this->assertEquals(false, $client->isConnected());
+    }
+
+    public function protocols()
+    {
+        return [
+            ['json'],
+            ['cbor'],
+        ];
     }
 }

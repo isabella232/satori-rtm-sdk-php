@@ -40,12 +40,13 @@ abstract class RtmClientBaseTestCase extends TestCase
         }
     }
 
-    public function establishConnection()
+    public function establishConnection($protocol = 'json')
     {
         $this->checkCredentials();
 
         $options = array(
             'auth' => new RoleAuth($this->credentials['auth_role_name'], $this->credentials['auth_role_secret_key']),
+            'sub_protocol' => $protocol,
         );
         $client = new RtmClientExt($this->credentials['endpoint'], $this->credentials['appkey'], $options);
 

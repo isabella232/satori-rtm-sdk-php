@@ -99,6 +99,7 @@ class Connection
     public function connect()
     {
         try {
+            $this->logger->debug('WS Sub-protocol: ' . $this->sub_protocol);
             $this->ws->connect();
         } catch (ConnectionException $e) {
             $this->logger->error($e->getMessage());
