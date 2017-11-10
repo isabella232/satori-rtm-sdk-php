@@ -6,6 +6,8 @@ use Tests\RtmClientBaseTestCase;
 use RtmClient\RtmClient;
 use RtmClient\Subscription\Events;
 
+use RtmClient\WebSocket\Client as Ws;
+
 class RtmClientSubscriptionRealTest extends RtmClientBaseTestCase
 {
     /**
@@ -320,8 +322,8 @@ class RtmClientSubscriptionRealTest extends RtmClientBaseTestCase
     public function protocols()
     {
         return [
-            ['json'],
-            ['cbor'],
+            [Ws::SUB_PROTOCOL_JSON],
+            [Ws::SUB_PROTOCOL_CBOR],
         ];
     }
 }

@@ -6,6 +6,8 @@ use PHPUnit\Framework\TestCase;
 use Tests\Helpers\RtmClientExt;
 use RtmClient\Auth\RoleAuth;
 
+use RtmClient\WebSocket\Client as Ws;
+
 abstract class RtmClientBaseTestCase extends TestCase
 {
     protected $credentials_filename = 'credentials.json';
@@ -40,7 +42,7 @@ abstract class RtmClientBaseTestCase extends TestCase
         }
     }
 
-    public function establishConnection($protocol = 'json')
+    public function establishConnection($protocol = Ws::SUB_PROTOCOL_CBOR)
     {
         $this->checkCredentials();
 

@@ -11,6 +11,8 @@ use RtmClient\Auth\RoleAuth;
 use RtmClient\Exceptions\ApplicationException;
 use RtmClient\WebSocket\Exceptions\ConnectionException;
 
+use RtmClient\WebSocket\Client as Ws;
+
 class RtmClientRealConnectionTest extends RtmClientBaseTestCase
 {
     public function testWrongEndpoint()
@@ -181,8 +183,8 @@ class RtmClientRealConnectionTest extends RtmClientBaseTestCase
     public function protocols()
     {
         return [
-            ['json'],
-            ['cbor'],
+            [Ws::SUB_PROTOCOL_JSON],
+            [Ws::SUB_PROTOCOL_CBOR],
         ];
     }
 }

@@ -6,6 +6,8 @@ use Tests\RtmClientBaseTestCase;
 use RtmClient\RtmClient;
 use RtmClient\Auth\RoleAuth;
 
+use RtmClient\WebSocket\Client as Ws;
+
 class RtmClientKVTest extends RtmClientBaseTestCase
 {
     /**
@@ -317,8 +319,8 @@ class RtmClientKVTest extends RtmClientBaseTestCase
     public function protocols()
     {
         return [
-            ['json'],
-            ['cbor'],
+            [Ws::SUB_PROTOCOL_JSON],
+            [Ws::SUB_PROTOCOL_CBOR],
         ];
     }
 }
