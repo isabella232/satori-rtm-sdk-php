@@ -1,3 +1,7 @@
+v0.x.x (xxxx-xx-xx)
+------------------------
+* Add support of CBOR sub-support.
+
 v0.1.0 (2017-10-11)
 ------------------------
 * Add ability to create Rtm client using the previous one;
