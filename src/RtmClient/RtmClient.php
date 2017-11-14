@@ -355,8 +355,9 @@ class RtmClient extends Observable
      * @param array $options Additional parameters for the RTM client instance
      *
      *     $options = [
-     *       'auth'   => (Auth\iAuth) Any instance that implements iAuth instance
-     *       'logger' => (\Psr\Log\LoggerInterface Custom logger
+     *       'auth'     => (Auth\iAuth) Any instance that implements iAuth instance
+     *       'logger'   => (\Psr\Log\LoggerInterface Custom logger
+     *       'protocol' => (string) Websocket protocol. Ws::PROTOCOL_JSON | Ws::PROTOCOL_CBOR
      *     ]
      *
      * @throws ApplicationException if endpoint is empty
@@ -371,6 +372,7 @@ class RtmClient extends Observable
             'auth' => null,
             'logger' => new Logger(),
             'connection_id' => null,
+            'protocol' => Ws::PROTOCOL_JSON,
         );
 
         if (strlen($endpoint) == 0) {
@@ -412,9 +414,11 @@ class RtmClient extends Observable
      * @param array $options Additional parameters for the RTM client instance
      *
      *     $options = [
-     *       'auth'   => (Auth\iAuth) Any instance that implements iAuth instance
-     *       'logger' => (\Psr\Log\LoggerInterface Custom logger
-     *       'connection_id'   => string Provides ability to create different connections to the same endpoint
+     *       'auth'          => (Auth\iAuth) Any instance that implements iAuth instance
+     *       'logger'        => (\Psr\Log\LoggerInterface Custom logger
+     *       'connection_id' => (string) Connection identifier.
+     *                          Provides ability to create different connections to the same endpoint
+     *       'protocol'      => (string) Websocket protocol. Ws::PROTOCOL_JSON | Ws::PROTOCOL_CBOR
      *     ]
      *
      * Usage:
@@ -491,6 +495,7 @@ class RtmClient extends Observable
             },
             'persistent_connection' => $this->persistent_connection,
             'connection_id' => $this->connection_id,
+            'protocol' => $this->options['protocol'],
         ));
 
         $this->logger->info('Client: Connecting to endpoint');

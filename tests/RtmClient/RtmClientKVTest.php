@@ -6,11 +6,16 @@ use Tests\RtmClientBaseTestCase;
 use RtmClient\RtmClient;
 use RtmClient\Auth\RoleAuth;
 
+use RtmClient\WebSocket\Client as Ws;
+
 class RtmClientKVTest extends RtmClientBaseTestCase
 {
-    public function testWrite()
+    /**
+     * @dataProvider protocols
+     */
+    public function testWrite($protocol)
     {
-        $client = $this->establishConnection();
+        $client = $this->establishConnection($protocol);
         $event = false;
 
         $client->write($this->getChannel(), 123, function ($code, $body) use (&$event) {
@@ -22,9 +27,12 @@ class RtmClientKVTest extends RtmClientBaseTestCase
         $this->assertTrue($event);
     }
 
-    public function testPublish()
+    /**
+     * @dataProvider protocols
+     */
+    public function testPublish($protocol)
     {
-        $client = $this->establishConnection();
+        $client = $this->establishConnection($protocol);
         $event = false;
 
         $client->publish($this->getChannel(), 123, function ($code, $body) use (&$event) {
@@ -36,9 +44,12 @@ class RtmClientKVTest extends RtmClientBaseTestCase
         $this->assertTrue($event);
     }
 
-    public function testReadInt()
+    /**
+     * @dataProvider protocols
+     */
+    public function testReadInt($protocol)
     {
-        $client = $this->establishConnection();
+        $client = $this->establishConnection($protocol);
         $channel = $this->getChannel();
         $event = false;
 
@@ -55,9 +66,12 @@ class RtmClientKVTest extends RtmClientBaseTestCase
         $this->assertTrue($event);
     }
 
-    public function testReadStruct()
+    /**
+     * @dataProvider protocols
+     */
+    public function testReadStruct($protocol)
     {
-        $client = $this->establishConnection();
+        $client = $this->establishConnection($protocol);
         $channel = $this->getChannel();
         $event = false;
         $struct = array(
@@ -79,9 +93,12 @@ class RtmClientKVTest extends RtmClientBaseTestCase
         $this->assertTrue($event);
     }
 
-    public function testReadEmpty()
+    /**
+     * @dataProvider protocols
+     */
+    public function testReadEmpty($protocol)
     {
-        $client = $this->establishConnection();
+        $client = $this->establishConnection($protocol);
         $channel = $this->getChannel();
         $event = false;
 
@@ -94,9 +111,12 @@ class RtmClientKVTest extends RtmClientBaseTestCase
         $this->assertTrue($event);
     }
 
-    public function testReadWrongChannel()
+    /**
+     * @dataProvider protocols
+     */
+    public function testReadWrongChannel($protocol)
     {
-        $client = $this->establishConnection();
+        $client = $this->establishConnection($protocol);
         $event = false;
 
         $client->read('', function ($code, $body) use (&$event) {
@@ -107,9 +127,12 @@ class RtmClientKVTest extends RtmClientBaseTestCase
         $this->assertTrue($event);
     }
 
-    public function testReadSecondValue()
+    /**
+     * @dataProvider protocols
+     */
+    public function testReadSecondValue($protocol)
     {
-        $client = $this->establishConnection();
+        $client = $this->establishConnection($protocol);
         $channel = $this->getChannel();
         $event = false;
 
@@ -127,9 +150,12 @@ class RtmClientKVTest extends RtmClientBaseTestCase
         $this->assertTrue($event);
     }
 
-    public function testReadUnicode()
+    /**
+     * @dataProvider protocols
+     */
+    public function testReadUnicode($protocol)
     {
-        $client = $this->establishConnection();
+        $client = $this->establishConnection($protocol);
         $channel = $this->getChannel();
         $event = false;
 
@@ -146,9 +172,12 @@ class RtmClientKVTest extends RtmClientBaseTestCase
         $this->assertTrue($event);
     }
 
-    public function testDeleteExisting()
+    /**
+     * @dataProvider protocols
+     */
+    public function testDeleteExisting($protocol)
     {
-        $client = $this->establishConnection();
+        $client = $this->establishConnection($protocol);
         $channel = $this->getChannel();
         $event = false;
 
@@ -178,9 +207,12 @@ class RtmClientKVTest extends RtmClientBaseTestCase
         $this->assertTrue($event);
     }
 
-    public function testRWPermissions()
+    /**
+     * @dataProvider protocols
+     */
+    public function testRWPermissions($protocol)
     {
-        $client = $this->establishConnection();
+        $client = $this->establishConnection($protocol);
         $channel = $this->getChannel();
         $event = false;
 
@@ -224,9 +256,12 @@ class RtmClientKVTest extends RtmClientBaseTestCase
         $this->assertTrue($event);
     }
 
-    public function testReadPosition()
+    /**
+     * @dataProvider protocols
+     */
+    public function testReadPosition($protocol)
     {
-        $client = $this->establishConnection();
+        $client = $this->establishConnection($protocol);
         $channel = $this->getChannel();
         $position = $event = null;
 
@@ -256,5 +291,36 @@ class RtmClientKVTest extends RtmClientBaseTestCase
         }
 
         $this->assertTrue($event);
+    }
+
+    public function testCborBin()
+    {
+        $client = $this->establishConnection('cbor');
+        $channel = $this->getChannel();
+        $event = false;
+
+        $data = array(
+            'bin' => pack("nvc*", 0x1234, 0x5678, 65, 66),
+            'bin2' => [0b1, 0b10, 0xFF, 0x2134],
+        );
+        $client->write($channel, $data, function () {
+        });
+        $client->sockReadSync(5); // wait for write
+
+        $client->read($channel, function ($code, $body) use (&$event, $data) {
+            $this->assertEquals($code, RtmClient::CODE_OK);
+            $this->assertEquals($body['message'], $data);
+            $event = true;
+        });
+        $client->sockReadSync(5); // wait for read
+        $this->assertTrue($event);
+    }
+
+    public function protocols()
+    {
+        return [
+            [Ws::PROTOCOL_JSON],
+            [Ws::PROTOCOL_CBOR],
+        ];
     }
 }

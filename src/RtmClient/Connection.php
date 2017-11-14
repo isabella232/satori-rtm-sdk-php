@@ -12,6 +12,8 @@ use RtmClient\WebSocket\OpCode;
 use RtmClient\WebSocket\Exceptions\BadSchemeException;
 use RtmClient\WebSocket\Exceptions\ConnectionException;
 
+use \CBOR\CBOREncoder;
+
 /**
  * Satori RTM Connection.
  *
@@ -57,7 +59,9 @@ class Connection
      * @param array $options Connection instance options
      *
      *     $options = [
-     *       'logger' => (\Psr\Log\LoggerInterface Custom logger
+     *       'logger'             => (\Psr\Log\LoggerInterface Custom logger
+     *       'on_unsolicited_pdu' => (callable) Callback that will be called on getting unsolicited PDU
+     *       'protocol'           => (string) Websocket protocol
      *     ]
      *
      * @throws BadSchemeException when endpoint schema is not starting from https://, http://, ws://, wss://
@@ -69,12 +73,14 @@ class Connection
             'logger' => new Logger(),
             'on_unsolicited_pdu' => null,
             'connection_id' => null,
+            'protocol' => Ws::PROTOCOL_JSON,
         );
 
         $options = array_merge($default_options, $options);
         $this->endpoint = $endpoint;
         $this->logger = $options['logger'];
         $this->on_unsolicited_pdu = $options['on_unsolicited_pdu'];
+        $this->protocol = $options['protocol'];
 
         try {
             $this->ws = new Ws($endpoint, $options);
@@ -93,6 +99,7 @@ class Connection
     public function connect()
     {
         try {
+            $this->logger->debug('WS Protocol: ' . $this->protocol);
             $this->ws->connect();
         } catch (ConnectionException $e) {
             $this->logger->error($e->getMessage());
@@ -128,11 +135,11 @@ class Connection
             $body,
             $id
         );
-        $json = $pdu->stringify();
-        $this->logger->debug('SEND> ' . $json);
+        $this->logger->debug('SEND> ' . $pdu->stringify());
         
+        $data = $this->protocol == Ws::PROTOCOL_JSON ? $pdu->stringify() : CBOREncoder::encode($pdu->struct());
         try {
-            $this->ws->send($json);
+            $this->ws->send($data);
         } catch (\Exception $e) {
             $this->logger->error($e->getMessage());
             throw $e;
@@ -156,7 +163,6 @@ class Connection
     public function read($mode, $timeout_sec = 0, $timeout_microsec = 0)
     {
         $pdu = null;
-
         try {
             list($code, $data) = $this->ws->read($mode, $timeout_sec, $timeout_microsec);
         } catch (\Exception $e) {
@@ -165,8 +171,18 @@ class Connection
         }
 
         if ($code == RC::READ_OK) {
-            $this->logger->debug('RECV< ' . $data);
-            $pdu = PduHelper::convertToPdu($data);
+            if ($this->protocol == Ws::PROTOCOL_CBOR) {
+                $decoded = CBOREncoder::decode($data);
+            } else {
+                if (null === $decoded = json_decode($data, true)) {
+                    throw new ApplicationException(
+                        'Bad PDU received' . PHP_EOL
+                        . $data
+                    );
+                }
+            }
+            $pdu = PduHelper::convertToPdu($decoded);
+            $this->logger->debug('RECV< ' . $pdu->stringify());
 
             if (isset($this->callbacks[$pdu->id])) {
                 $callback = $this->callbacks[$pdu->id];

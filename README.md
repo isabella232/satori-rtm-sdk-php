@@ -124,6 +124,13 @@ To enable testing verbose mode use:
 CREDENTIALS=/full/path/to/credentials.json composer test-verbose
 ```
 
+# Binary protocol
+
+RTM supports CBOR protocol to work with a binary data.  
+In order to use CBOR protocol you must to install PHP SDK via Composer: [How to install SDK via Composer](#via-composer)
+
+See `examples/cbor.php` to get more information about establishing a connection using CBOR.
+
 # Persistent connections
 
 Persistent connections are good solution to reduce execution time by using an already established connection.

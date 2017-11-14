@@ -6,11 +6,16 @@ use Tests\RtmClientBaseTestCase;
 use RtmClient\RtmClient;
 use RtmClient\Subscription\Events;
 
+use RtmClient\WebSocket\Client as Ws;
+
 class RtmClientSubscriptionRealTest extends RtmClientBaseTestCase
 {
-    public function testWrongPosition()
+    /**
+     * @dataProvider protocols
+     */
+    public function testWrongPosition($protocol)
     {
-        $client = $this->establishConnection();
+        $client = $this->establishConnection($protocol);
         $channel = $this->getChannel();
         $events = array(
             'subscribed' => false,
@@ -41,9 +46,12 @@ class RtmClientSubscriptionRealTest extends RtmClientBaseTestCase
         $client->subscribe($channel, $callback);
     }
 
-    public function testExpiredPosition()
+    /**
+     * @dataProvider protocols
+     */
+    public function testExpiredPosition($protocol)
     {
-        $client = $this->establishConnection();
+        $client = $this->establishConnection($protocol);
         $channel = $this->getChannel();
         $event = false;
 
@@ -67,9 +75,12 @@ class RtmClientSubscriptionRealTest extends RtmClientBaseTestCase
         $this->assertTrue($event);
     }
 
-    public function testResubscribe()
+    /**
+     * @dataProvider protocols
+     */
+    public function testResubscribe($protocol)
     {
-        $client = $this->establishConnection();
+        $client = $this->establishConnection($protocol);
         $channel = $this->getChannel();
         $events = array(
             Events::ERROR => false,
@@ -111,9 +122,12 @@ class RtmClientSubscriptionRealTest extends RtmClientBaseTestCase
         $this->assertEquals($opts['filter'], 'SELECT COUNT(*) FROM `test`');
     }
 
-    public function testSimpleSubscription()
+    /**
+     * @dataProvider protocols
+     */
+    public function testSimpleSubscription($protocol)
     {
-        $client = $this->establishConnection();
+        $client = $this->establishConnection($protocol);
         $channel = $this->getChannel();
         $received = 0;
 
@@ -156,9 +170,12 @@ class RtmClientSubscriptionRealTest extends RtmClientBaseTestCase
         $this->assertEquals($received, 7);
     }
 
-    public function testSubscriptionFilter()
+    /**
+     * @dataProvider protocols
+     */
+    public function testSubscriptionFilter($protocol)
     {
-        $client = $this->establishConnection();
+        $client = $this->establishConnection($protocol);
         $channel = $this->getChannel();
         $received = 0;
         $expected = array(
@@ -197,9 +214,12 @@ class RtmClientSubscriptionRealTest extends RtmClientBaseTestCase
         $this->assertEquals($received, 2);
     }
 
-    public function testUnsubscribe()
+    /**
+     * @dataProvider protocols
+     */
+    public function testUnsubscribe($protocol)
     {
-        $client = $this->establishConnection();
+        $client = $this->establishConnection($protocol);
         $channel = $this->getChannel();
         $received = 0;
 
@@ -234,17 +254,23 @@ class RtmClientSubscriptionRealTest extends RtmClientBaseTestCase
         $this->assertEquals($received, 1);
     }
 
-    public function testUnsubscribeNonExisting()
+    /**
+     * @dataProvider protocols
+     */
+    public function testUnsubscribeNonExisting($protocol)
     {
-        $client = $this->establishConnection();
+        $client = $this->establishConnection($protocol);
         $channel = $this->getChannel();
 
         $this->assertEquals($client->unsubscribe($channel), RtmClient::ERROR_CODE_UNKNOWN_SUBSCRIPTION);
     }
 
-    public function testCloneClient()
+    /**
+     * @dataProvider protocols
+     */
+    public function testCloneClient($protocol)
     {
-        $client = $this->establishConnection();
+        $client = $this->establishConnection($protocol);
         $channel = $this->getChannel();
         $messages = 0;
 
@@ -266,9 +292,12 @@ class RtmClientSubscriptionRealTest extends RtmClientBaseTestCase
         $this->assertEquals(1, $messages);
     }
 
-    public function testWaitAllRepliesForData()
+    /**
+     * @dataProvider protocols
+     */
+    public function testWaitAllRepliesForData($protocol)
     {
-        $client = $this->establishConnection();
+        $client = $this->establishConnection($protocol);
         $channel = $this->getChannel();
         $messages = 0;
 
@@ -288,5 +317,13 @@ class RtmClientSubscriptionRealTest extends RtmClientBaseTestCase
         $client->waitAllReplies(5);
 
         $this->assertGreaterThan(0, $messages);
+    }
+
+    public function protocols()
+    {
+        return [
+            [Ws::PROTOCOL_JSON],
+            [Ws::PROTOCOL_CBOR],
+        ];
     }
 }
