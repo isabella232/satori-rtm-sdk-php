@@ -15,7 +15,7 @@ const ROLE = 'YOUR_ROLE';
 const ROLE_SECRET_KEY = 'YOUR_SECRET';
 
 $options = array(
-    'sub_protocol' => Ws::SUB_PROTOCOL_CBOR,
+    'protocol' => Ws::PROTOCOL_CBOR,
 );
 
 if (ROLE_SECRET_KEY != 'YOUR_SECRET') {

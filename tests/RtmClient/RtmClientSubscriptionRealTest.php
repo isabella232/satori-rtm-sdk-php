@@ -322,8 +322,8 @@ class RtmClientSubscriptionRealTest extends RtmClientBaseTestCase
     public function protocols()
     {
         return [
-            [Ws::SUB_PROTOCOL_JSON],
-            [Ws::SUB_PROTOCOL_CBOR],
+            [Ws::PROTOCOL_JSON],
+            [Ws::PROTOCOL_CBOR],
         ];
     }
 }

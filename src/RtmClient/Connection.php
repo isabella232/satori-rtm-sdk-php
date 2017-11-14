@@ -61,7 +61,7 @@ class Connection
      *     $options = [
      *       'logger'             => (\Psr\Log\LoggerInterface Custom logger
      *       'on_unsolicited_pdu' => (callable) Callback that will be called on getting unsolicited PDU
-     *       'sub_protocol'       => (string) Websocket sub-protocol
+     *       'protocol'           => (string) Websocket protocol
      *     ]
      *
      * @throws BadSchemeException when endpoint schema is not starting from https://, http://, ws://, wss://
@@ -73,14 +73,14 @@ class Connection
             'logger' => new Logger(),
             'on_unsolicited_pdu' => null,
             'connection_id' => null,
-            'sub_protocol' => Ws::SUB_PROTOCOL_JSON,
+            'protocol' => Ws::PROTOCOL_JSON,
         );
 
         $options = array_merge($default_options, $options);
         $this->endpoint = $endpoint;
         $this->logger = $options['logger'];
         $this->on_unsolicited_pdu = $options['on_unsolicited_pdu'];
-        $this->sub_protocol = $options['sub_protocol'];
+        $this->protocol = $options['protocol'];
 
         try {
             $this->ws = new Ws($endpoint, $options);
@@ -99,7 +99,7 @@ class Connection
     public function connect()
     {
         try {
-            $this->logger->debug('WS Sub-protocol: ' . $this->sub_protocol);
+            $this->logger->debug('WS Protocol: ' . $this->protocol);
             $this->ws->connect();
         } catch (ConnectionException $e) {
             $this->logger->error($e->getMessage());
@@ -137,7 +137,7 @@ class Connection
         );
         $this->logger->debug('SEND> ' . $pdu->stringify());
         
-        $data = $this->sub_protocol == Ws::SUB_PROTOCOL_JSON ? $pdu->stringify() : CBOREncoder::encode($pdu->struct());
+        $data = $this->protocol == Ws::PROTOCOL_JSON ? $pdu->stringify() : CBOREncoder::encode($pdu->struct());
         try {
             $this->ws->send($data);
         } catch (\Exception $e) {
@@ -171,7 +171,7 @@ class Connection
         }
 
         if ($code == RC::READ_OK) {
-            if ($this->sub_protocol == Ws::SUB_PROTOCOL_CBOR) {
+            if ($this->protocol == Ws::PROTOCOL_CBOR) {
                 $decoded = CBOREncoder::decode($data);
             } else {
                 if (null === $decoded = json_decode($data, true)) {

@@ -42,13 +42,13 @@ abstract class RtmClientBaseTestCase extends TestCase
         }
     }
 
-    public function establishConnection($protocol = Ws::SUB_PROTOCOL_CBOR)
+    public function establishConnection($protocol = Ws::PROTOCOL_CBOR)
     {
         $this->checkCredentials();
 
         $options = array(
             'auth' => new RoleAuth($this->credentials['auth_role_name'], $this->credentials['auth_role_secret_key']),
-            'sub_protocol' => $protocol,
+            'protocol' => $protocol,
         );
         $client = new RtmClientExt($this->credentials['endpoint'], $this->credentials['appkey'], $options);
 

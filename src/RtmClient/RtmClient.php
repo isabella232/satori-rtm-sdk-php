@@ -357,7 +357,7 @@ class RtmClient extends Observable
      *     $options = [
      *       'auth'         => (Auth\iAuth) Any instance that implements iAuth instance
      *       'logger'       => (\Psr\Log\LoggerInterface Custom logger
-     *       'sub_protocol' => (string) Websocket sub-protocol. Ws::SUB_PROTOCOL_JSON | Ws::SUB_PROTOCOL_CBOR
+     *       'protocol' => (string) Websocket protocol. Ws::PROTOCOL_JSON | Ws::PROTOCOL_CBOR
      *     ]
      *
      * @throws ApplicationException if endpoint is empty
@@ -372,7 +372,7 @@ class RtmClient extends Observable
             'auth' => null,
             'logger' => new Logger(),
             'connection_id' => null,
-            'sub_protocol' => Ws::SUB_PROTOCOL_JSON,
+            'protocol' => Ws::PROTOCOL_JSON,
         );
 
         if (strlen($endpoint) == 0) {
@@ -418,7 +418,7 @@ class RtmClient extends Observable
      *       'logger'        => (\Psr\Log\LoggerInterface Custom logger
      *       'connection_id' => (string) Connection identifier.
      *                          Provides ability to create different connections to the same endpoint
-     *       'sub_protocol' => (string) Websocket sub-protocol. Ws::SUB_PROTOCOL_JSON | Ws::SUB_PROTOCOL_CBOR
+     *       'protocol'      => (string) Websocket protocol. Ws::PROTOCOL_JSON | Ws::PROTOCOL_CBOR
      *     ]
      *
      * Usage:
@@ -495,7 +495,7 @@ class RtmClient extends Observable
             },
             'persistent_connection' => $this->persistent_connection,
             'connection_id' => $this->connection_id,
-            'sub_protocol' => $this->options['sub_protocol'],
+            'protocol' => $this->options['protocol'],
         ));
 
         $this->logger->info('Client: Connecting to endpoint');
