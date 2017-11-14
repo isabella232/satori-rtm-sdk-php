@@ -1,6 +1,6 @@
-v0.x.x (xxxx-xx-xx)
+v1.0.1 (2017-11-14)
 ------------------------
-* Add support of CBOR sub-support.
+* Add support of CBOR.
 
 v0.1.0 (2017-10-11)
 ------------------------
