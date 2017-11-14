@@ -355,8 +355,8 @@ class RtmClient extends Observable
      * @param array $options Additional parameters for the RTM client instance
      *
      *     $options = [
-     *       'auth'         => (Auth\iAuth) Any instance that implements iAuth instance
-     *       'logger'       => (\Psr\Log\LoggerInterface Custom logger
+     *       'auth'     => (Auth\iAuth) Any instance that implements iAuth instance
+     *       'logger'   => (\Psr\Log\LoggerInterface Custom logger
      *       'protocol' => (string) Websocket protocol. Ws::PROTOCOL_JSON | Ws::PROTOCOL_CBOR
      *     ]
      *
